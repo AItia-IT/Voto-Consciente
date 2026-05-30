@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ExternalLink, Loader2 } from "lucide-react";
 import { addXP } from "@/lib/progress";
+import { SpeakerButton } from "@/components/speaker-button";
 
 const STATUS_COLORS: Record<string, string> = {
   Aprovado: "bg-green-100 text-green-800 border-green-300",
@@ -58,6 +59,8 @@ export default function Politico() {
     );
   }
 
+  const profileText = `${politico.nome}. Partido: ${politico.partido}. Cargo: ${politico.cargo}. ${ESFERA_LABELS[politico.esfera] ?? politico.esfera}. ${politico.localidade}.`;
+
   return (
     <div className="max-w-3xl mx-auto py-6 space-y-6">
       <Link href="/match">
@@ -73,8 +76,13 @@ export default function Politico() {
               {politico.foto ?? "👤"}
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl font-extrabold text-foreground leading-tight">{politico.nome}</h1>
-              <p className="text-lg font-semibold text-muted-foreground">{politico.nomeUrna}</p>
+              <div className="flex items-start gap-3">
+                <div className="flex-1">
+                  <h1 className="text-3xl font-extrabold text-foreground leading-tight">{politico.nome}</h1>
+                  <p className="text-lg font-semibold text-muted-foreground">{politico.nomeUrna}</p>
+                </div>
+                <SpeakerButton text={profileText} className="shrink-0 mt-1" />
+              </div>
               <div className="flex flex-wrap gap-2 mt-3">
                 <Badge variant="outline" className="text-base px-3 py-1 font-bold">{politico.partido}</Badge>
                 <Badge variant="secondary" className="text-base px-3 py-1">{politico.cargo}</Badge>
@@ -121,12 +129,16 @@ export default function Politico() {
                     <Badge className="shrink-0 mt-0.5 bg-primary/10 text-primary border-primary/20 font-semibold text-sm px-3">
                       {p.categoria}
                     </Badge>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-lg text-foreground leading-relaxed">{p.descricao}</p>
                       {p.fonte && (
                         <p className="text-sm text-muted-foreground mt-1">Fonte: {p.fonte}</p>
                       )}
                     </div>
+                    <SpeakerButton
+                      text={`${p.categoria}: ${p.descricao}`}
+                      className="shrink-0 h-10 w-10"
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -147,11 +159,17 @@ export default function Politico() {
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="text-lg font-bold text-foreground leading-snug flex-1">{r.titulo}</h3>
-                      <span
-                        className={`shrink-0 text-sm font-semibold px-3 py-1 rounded-full border ${STATUS_COLORS[r.status] ?? "bg-gray-100 text-gray-600 border-gray-300"}`}
-                      >
-                        {r.status}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={`text-sm font-semibold px-3 py-1 rounded-full border ${STATUS_COLORS[r.status] ?? "bg-gray-100 text-gray-600 border-gray-300"}`}
+                        >
+                          {r.status}
+                        </span>
+                        <SpeakerButton
+                          text={`${r.titulo}. Status: ${r.status}. ${r.descricao}`}
+                          className="h-10 w-10"
+                        />
+                      </div>
                     </div>
                     <p className="text-base text-muted-foreground leading-relaxed">{r.descricao}</p>
                     <div className="flex items-center justify-between">

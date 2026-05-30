@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { addXP, completeMission } from "@/lib/progress";
 import mascoteImg from "@/assets/mascote.png";
 
-// ── Civic terms + their definitions (Sônia "calls" the definition) ──
 const TERMS: { term: string; definition: string }[] = [
   { term: "Poder Executivo", definition: "Governa o país, estado ou município. Presidente, governadores e prefeitos fazem parte deste poder." },
   { term: "Poder Legislativo", definition: "Cria as leis. Inclui o Congresso Nacional, Assembleias estaduais e Câmaras municipais." },
@@ -42,16 +41,14 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// 3×3 grid = 9 cells, all with terms (no FREE)
 function buildGrid() {
   return shuffle(TERMS).slice(0, 9);
 }
 
-// All winning lines for 3×3
 const LINES = [
-  [0,1,2],[3,4,5],[6,7,8], // rows
-  [0,3,6],[1,4,7],[2,5,8], // cols
-  [0,4,8],[2,4,6],         // diagonals
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6],
 ];
 
 function checkBingo(marked: Set<number>): number[][] {
@@ -63,6 +60,8 @@ function initGame() {
   const callOrder = shuffle([...grid]);
   return { grid, callOrder };
 }
+
+const instructionsText = "Bingo Cívico! Sônia chama a definição — toque o termo correto na cartela para marcar. Complete uma linha, coluna ou diagonal para fazer Bingo!";
 
 export default function Bingo() {
   const [{ grid, callOrder }, setGame] = useState(() => initGame());
@@ -130,6 +129,7 @@ export default function Bingo() {
   const isBingoCell = (idx: number) => bingoLines.some(line => line.includes(idx));
 
   if (showComplete) {
+    const completeText = `Parabéns! Cartela completa! Você acertou todos os 9 termos cívicos e ganhou ${xpAwarded} pontos de experiência. Incrível!`;
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -138,7 +138,10 @@ export default function Bingo() {
       >
         <div className="bg-yellow-50 border-4 border-yellow-400 p-8 rounded-3xl shadow-2xl max-w-md w-full">
           <div className="text-7xl mb-4">🎓</div>
-          <h1 className="text-3xl font-extrabold text-yellow-800 mb-2">CARTELA COMPLETA!</h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <h1 className="text-3xl font-extrabold text-yellow-800">CARTELA COMPLETA!</h1>
+            <SpeakerButton text={completeText} className="h-10 w-10 shrink-0" />
+          </div>
           <h2 className="text-xl font-bold text-yellow-900 mb-4">Cidadão Democrata</h2>
           <p className="text-lg text-yellow-700 mb-4">
             Você acertou todos os 9 termos cívicos! Incrível!
@@ -170,9 +173,12 @@ export default function Bingo() {
           style={{ background: "#FEF3C7", color: "#92400E" }}>
           🎱 Bingo Cívico
         </div>
-        <h1 className="text-2xl font-extrabold" style={{ color: "#1a2744" }}>
-          Academia da Democracia
-        </h1>
+        <div className="flex items-center justify-center gap-3">
+          <h1 className="text-2xl font-extrabold" style={{ color: "#1a2744" }}>
+            Academia da Democracia
+          </h1>
+          <SpeakerButton text={instructionsText} className="h-10 w-10 shrink-0" />
+        </div>
         <p className="text-sm mt-1" style={{ color: "#6B7280" }}>
           Sônia chama a definição — toque o termo correto na cartela!
         </p>
@@ -241,7 +247,7 @@ export default function Bingo() {
         )}
       </AnimatePresence>
 
-      {/* 4×4 Bingo Grid */}
+      {/* 3×3 Bingo Grid */}
       <div className="grid grid-cols-3 gap-3">
         {grid.map((cell, idx) => {
           const isMarked = marked.has(idx);

@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { SpeakerButton } from "@/components/speaker-button";
-import { AlertCircle, GraduationCap, UserCheck, User, ArrowRight, MessageCircle, Shield, Grid3X3 } from "lucide-react";
+import { AlertCircle, GraduationCap, UserCheck, User, ArrowRight, MessageCircle, Grid3X3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -8,6 +8,11 @@ import mascoteImg from "@/assets/mascote.png";
 
 const soniaMessage =
   "Oi! Eu sou a Sônia. Vou te acompanhar passo a passo. Pode ir no seu ritmo — aqui não tem pressa nem cobrança. 💛";
+
+const heroTitle = "Aprender, conferir, decidir.";
+const heroDescription =
+  "O Voto Consciente é um espaço calmo e divertido para você aprender a reconhecer notícias falsas, entender melhor a democracia e conhecer propostas de candidatos — sempre de forma neutra.";
+const sectionTitle = "Por onde começar? Escolha a atividade que mais te interessa.";
 
 const cards = [
   {
@@ -29,7 +34,7 @@ const cards = [
     badge: "5 missões",
   },
   {
-    title: "Bingo Cívico 🎱",
+    title: "Bingo Cívico",
     description: "Jogue bingo aprendendo termos e conceitos da democracia brasileira.",
     icon: Grid3X3,
     path: "/bingo",
@@ -83,15 +88,21 @@ export default function Home() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-extrabold leading-tight mb-4" style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)", color: "#1a2744" }}>
-            Aprender, conferir,{" "}
-            <span style={{ color: "#F59E0B" }}>decidir.</span>
-          </h1>
+          <div className="flex items-start gap-3 mb-4">
+            <h1 className="font-extrabold leading-tight flex-1" style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)", color: "#1a2744" }}>
+              Aprender, conferir,{" "}
+              <span style={{ color: "#F59E0B" }}>decidir.</span>
+            </h1>
+            <SpeakerButton text={heroTitle} className="shrink-0 mt-1" />
+          </div>
 
           {/* Sub */}
-          <p className="text-lg leading-relaxed mb-7" style={{ color: "#4a5568", maxWidth: 480 }}>
-            O Voto Consciente é um espaço calmo e divertido para você aprender a reconhecer notícias falsas, entender melhor a democracia e conhecer propostas de candidatos — sempre de forma neutra.
-          </p>
+          <div className="flex items-start gap-3 mb-7">
+            <p className="text-lg leading-relaxed flex-1" style={{ color: "#4a5568", maxWidth: 480 }}>
+              {heroDescription}
+            </p>
+            <SpeakerButton text={heroDescription} className="shrink-0 mt-1" />
+          </div>
 
           {/* CTAs */}
           <div className="flex flex-wrap gap-3 mb-6">
@@ -147,9 +158,12 @@ export default function Home() {
       </section>
 
       {/* ── Section title ── */}
-      <div className="mb-5">
-        <h2 className="text-2xl font-bold" style={{ color: "#1a2744" }}>Por onde começar?</h2>
-        <p className="text-base mt-1" style={{ color: "#6B7280" }}>Escolha a atividade que mais te interessa.</p>
+      <div className="mb-5 flex items-center gap-3">
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold" style={{ color: "#1a2744" }}>Por onde começar?</h2>
+          <p className="text-base mt-1" style={{ color: "#6B7280" }}>Escolha a atividade que mais te interessa.</p>
+        </div>
+        <SpeakerButton text={sectionTitle} className="shrink-0" />
       </div>
 
       {/* ── Feature cards ── */}
@@ -157,33 +171,45 @@ export default function Home() {
         {cards.map((card, idx) => {
           const Icon = card.icon;
           return (
-            <Link key={card.path} href={card.path}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + idx * 0.08 }}
-                className="block cursor-pointer h-full"
-                data-testid={`link-home-card-${idx}`}
-              >
-                <Card className="hover:shadow-lg transition-all hover:-translate-y-0.5 h-full bg-white border-2 hover:border-amber-300" style={{ borderColor: "#F3F4F6" }}>
-                  <CardContent className="p-5 flex items-center gap-4 h-full">
-                    <div
-                      className="p-4 rounded-2xl shrink-0 flex items-center justify-center"
-                      style={{ background: card.iconBg }}
-                    >
-                      <Icon className="h-8 w-8" style={{ color: card.iconColor }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-lg leading-tight" style={{ color: "#1a2744" }}>{card.title}</h3>
+            <div key={card.path} className="relative">
+              <Link href={card.path}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + idx * 0.08 }}
+                  className="block cursor-pointer h-full"
+                  data-testid={`link-home-card-${idx}`}
+                >
+                  <Card className="hover:shadow-lg transition-all hover:-translate-y-0.5 h-full bg-white border-2 hover:border-amber-300" style={{ borderColor: "#F3F4F6" }}>
+                    <CardContent className="p-5 flex items-center gap-4 h-full">
+                      <div
+                        className="p-4 rounded-2xl shrink-0 flex items-center justify-center"
+                        style={{ background: card.iconBg }}
+                      >
+                        <Icon className="h-8 w-8" style={{ color: card.iconColor }} />
                       </div>
-                      <p className="text-sm leading-snug" style={{ color: "#6B7280" }}>{card.description}</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 shrink-0" style={{ color: "#9CA3AF" }} />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Link>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-lg leading-tight" style={{ color: "#1a2744" }}>{card.title}</h3>
+                        </div>
+                        <p className="text-sm leading-snug" style={{ color: "#6B7280" }}>{card.description}</p>
+                      </div>
+                      <ArrowRight className="h-5 w-5 shrink-0" style={{ color: "#9CA3AF" }} />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Link>
+              {/* Speaker button outside the Link to prevent navigation on click */}
+              <div
+                className="absolute bottom-3 right-10"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <SpeakerButton
+                  text={`${card.title}. ${card.description}`}
+                  className="h-9 w-9 bg-white shadow-sm"
+                />
+              </div>
+            </div>
           );
         })}
       </div>

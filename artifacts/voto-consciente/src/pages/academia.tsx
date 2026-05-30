@@ -77,14 +77,11 @@ export default function Academia() {
     if (activeMission && currentCard + 1 < activeMission.cards.length) {
       setCurrentCard(c => c + 1);
     } else if (activeMission) {
-      // Finish mission
       completeMission(activeMission.id);
       addXP(activeMission.xp);
       const newCompleted = [...completed, activeMission.id];
       setCompleted(newCompleted);
       setActiveMission(null);
-      
-      // Check certificate
       if (newCompleted.length >= MISSIONS.length) {
         setShowCertificate(true);
       }
@@ -92,12 +89,16 @@ export default function Academia() {
   };
 
   if (showCertificate) {
+    const certText = "Parabéns! Você completou todas as missões da Academia da Democracia e está pronto para votar com consciência! Você conquistou o certificado Cidadão Democrata!";
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-6">
         <div className="bg-yellow-50 border-4 border-yellow-400 p-8 rounded-xl shadow-2xl relative overflow-hidden w-full max-w-md mx-auto">
           <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200 rounded-bl-full -z-10 opacity-50" />
           <div className="text-7xl mb-6">🎓</div>
-          <h1 className="text-3xl font-extrabold text-yellow-800 mb-2">CERTIFICADO</h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <h1 className="text-3xl font-extrabold text-yellow-800">CERTIFICADO</h1>
+            <SpeakerButton text={certText} className="h-10 w-10 shrink-0" />
+          </div>
           <h2 className="text-2xl font-bold text-yellow-900 mb-6">Cidadão Democrata</h2>
           <p className="text-xl text-yellow-700 font-medium">Você completou todas as missões da Academia da Democracia e está pronto para votar com consciência!</p>
         </div>
@@ -113,16 +114,22 @@ export default function Academia() {
     return (
       <div className="flex flex-col min-h-[70vh] py-4 max-w-2xl mx-auto">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 text-foreground">
-            {activeMission.title}
-          </h2>
+          <div className="flex items-center gap-3 mb-2">
+            <h2 className="text-2xl font-bold text-foreground flex-1">
+              {activeMission.title}
+            </h2>
+            <SpeakerButton
+              text={`Missão: ${activeMission.title}. ${activeMission.subtitle}`}
+              className="shrink-0 h-10 w-10"
+            />
+          </div>
           <div className="w-full bg-muted rounded-full h-3">
             <div className="bg-primary h-3 rounded-full transition-all duration-300" style={{ width: `${((currentCard) / activeMission.cards.length) * 100}%` }} />
           </div>
         </div>
 
         <AnimatePresence mode="wait">
-          <motion.div 
+          <motion.div
             key={currentCard}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -153,7 +160,7 @@ export default function Academia() {
 
   return (
     <div className="space-y-8 pb-6">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="rounded-2xl p-6 shadow-sm border border-border flex flex-row items-center text-left relative overflow-hidden gap-4"
@@ -161,8 +168,9 @@ export default function Academia() {
       >
         <img src={mascoteImg} alt="Sônia" className="h-20 w-20 md:h-24 md:w-24 rounded-full object-cover border-4 border-white shadow-md shrink-0" />
         <div className="flex-1 relative">
-            <p className="text-lg md:text-xl leading-relaxed text-foreground font-medium">"{welcomeMessage}"</p>
+          <p className="text-lg md:text-xl leading-relaxed text-foreground font-medium">"{welcomeMessage}"</p>
         </div>
+        <SpeakerButton text={welcomeMessage} className="shrink-0" />
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -173,9 +181,10 @@ export default function Academia() {
 
           return (
             <div key={mission.id} className="relative">
-              <Card className={`overflow-hidden transition-all h-full ${isNext ? 'ring-2 ring-primary ring-offset-2 ring-offset-background shadow-md cursor-pointer bg-white' : isLocked ? 'opacity-80 bg-muted/50 cursor-not-allowed' : 'bg-white cursor-pointer'}`}
+              <Card
+                className={`overflow-hidden transition-all h-full ${isNext ? 'ring-2 ring-primary ring-offset-2 ring-offset-background shadow-md cursor-pointer bg-white' : isLocked ? 'opacity-80 bg-muted/50 cursor-not-allowed' : 'bg-white cursor-pointer'}`}
                 onClick={() => {
-                    if(!isLocked && !isCompleted) startMission(mission);
+                  if (!isLocked && !isCompleted) startMission(mission);
                 }}
               >
                 <CardContent className="p-6 flex flex-col h-full gap-4">
@@ -183,28 +192,34 @@ export default function Academia() {
                     <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl
                         ${isCompleted ? 'bg-green-100 text-green-600' : isNext ? 'bg-[#F5A623] text-white' : 'bg-gray-300 text-gray-500'}
                     `}>
-                        {isCompleted ? <CheckCircle2 className="h-7 w-7" /> : 
-                         isLocked ? <Lock className="h-6 w-6" /> :
-                         mission.id}
+                      {isCompleted ? <CheckCircle2 className="h-7 w-7" /> :
+                       isLocked ? <Lock className="h-6 w-6" /> :
+                       mission.id}
                     </div>
                     <div className="flex-1">
-                        <h3 className="font-bold text-xl text-foreground mb-1">{mission.title}</h3>
-                        <p className="text-sm text-muted-foreground">{mission.subtitle}</p>
+                      <h3 className="font-bold text-xl text-foreground mb-1">{mission.title}</h3>
+                      <p className="text-sm text-muted-foreground">{mission.subtitle}</p>
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <SpeakerButton
+                        text={`Missão ${mission.id}: ${mission.title}. ${mission.subtitle}.`}
+                        className="h-10 w-10 shrink-0"
+                      />
                     </div>
                   </div>
-                  
+
                   <div className="mt-auto pt-4 flex items-center justify-between border-t border-border">
                     <span className="text-sm font-bold text-secondary-foreground bg-secondary/30 px-3 py-1 rounded-full">
-                        +{mission.xp} XP
+                      +{mission.xp} XP
                     </span>
                     {!isLocked && !isCompleted && (
-                        <span className="text-sm font-bold text-primary">Toque para começar</span>
+                      <span className="text-sm font-bold text-primary">Toque para começar</span>
                     )}
                     {isLocked && (
-                        <span className="text-sm font-bold text-muted-foreground">Conclua a anterior</span>
+                      <span className="text-sm font-bold text-muted-foreground">Conclua a anterior</span>
                     )}
-                     {isCompleted && (
-                        <span className="text-sm font-bold text-green-600">Concluída</span>
+                    {isCompleted && (
+                      <span className="text-sm font-bold text-green-600">Concluída</span>
                     )}
                   </div>
                 </CardContent>
