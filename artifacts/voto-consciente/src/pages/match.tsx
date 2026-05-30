@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, ChevronDown, ChevronUp, CheckCircle2, XCircle, Loader2, ExternalLink } from "lucide-react";
 import { useListPoliticos } from "@workspace/api-client-react";
 import type { Politico } from "@workspace/api-client-react";
+import { useTTS } from "@/hooks/use-tts";
 
 type Theme = {
   id: string;
@@ -170,6 +171,19 @@ export default function Match() {
   const [showResults, setShowResults] = useState(false);
 
   const { data: politicos, isLoading } = useListPoliticos();
+  const { speak } = useTTS();
+
+  // Auto-read each theme question + options so illiterate users hear the choices
+  useEffect(() => {
+    if (!started || showResults) return;
+    const theme = THEMES[currentTheme];
+    const text =
+      `Tema ${currentTheme + 1} de ${THEMES.length}: ${theme.title}. ` +
+      `O que você considera mais importante? ` +
+      theme.options.map(o => `Opção ${o.id}: ${o.text}`).join('. ');
+    const t = setTimeout(() => speak(text), 700);
+    return () => clearTimeout(t);
+  }, [started, currentTheme, showResults]);
 
   const candidates: CandidateWithMatch[] = (politicos ?? []).map(p => ({
     ...p,
