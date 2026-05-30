@@ -210,7 +210,7 @@ export default function Bingo() {
           ✅ {marked.size}/9 marcados
         </span>
         {bingoLines.length > 0 && (
-          <span className="text-sm font-bold px-3 py-1 rounded-full"
+          <span className="text-lg font-bold px-3 py-1 rounded-full"
             style={{ background: "#FEF3C7", color: "#92400E" }}>
             🎉 {bingoLines.length} BINGO{bingoLines.length > 1 ? "S" : ""}! +{xpAwarded} XP
           </span>
