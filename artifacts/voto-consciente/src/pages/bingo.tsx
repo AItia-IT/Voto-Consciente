@@ -42,16 +42,16 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// 4×4 grid = 16 cells, all with terms (no FREE)
+// 3×3 grid = 9 cells, all with terms (no FREE)
 function buildGrid() {
-  return shuffle(TERMS).slice(0, 16);
+  return shuffle(TERMS).slice(0, 9);
 }
 
-// All winning lines for 4×4
+// All winning lines for 3×3
 const LINES = [
-  [0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15], // rows
-  [0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15], // cols
-  [0,5,10,15],[3,6,9,12], // diagonals
+  [0,1,2],[3,4,5],[6,7,8], // rows
+  [0,3,6],[1,4,7],[2,5,8], // cols
+  [0,4,8],[2,4,6],         // diagonals
 ];
 
 function checkBingo(marked: Set<number>): number[][] {
@@ -100,7 +100,7 @@ export default function Bingo() {
       setBingoLines(lines);
       setMarked(newMarked);
 
-      if (newMarked.size === 16) {
+      if (newMarked.size === 9) {
         completeMission(99);
         addXP(200);
         setXpAwarded(prev => prev + 200);
@@ -141,7 +141,7 @@ export default function Bingo() {
           <h1 className="text-3xl font-extrabold text-yellow-800 mb-2">CARTELA COMPLETA!</h1>
           <h2 className="text-xl font-bold text-yellow-900 mb-4">Cidadão Democrata</h2>
           <p className="text-lg text-yellow-700 mb-4">
-            Você acertou todos os 16 termos cívicos! Incrível!
+            Você acertou todos os 9 termos cívicos! Incrível!
           </p>
           <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full font-bold text-lg">
             🏆 +{xpAwarded} XP ganhos!
@@ -207,7 +207,7 @@ export default function Bingo() {
       {/* Status bar */}
       <div className="flex items-center justify-between mb-3 px-1">
         <span className="text-sm font-bold" style={{ color: "#6B7280" }}>
-          ✅ {marked.size}/16 marcados
+          ✅ {marked.size}/9 marcados
         </span>
         {bingoLines.length > 0 && (
           <span className="text-sm font-bold px-3 py-1 rounded-full"
@@ -242,7 +242,7 @@ export default function Bingo() {
       </AnimatePresence>
 
       {/* 4×4 Bingo Grid */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         {grid.map((cell, idx) => {
           const isMarked = marked.has(idx);
           const isBingo = isBingoCell(idx);
