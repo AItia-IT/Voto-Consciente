@@ -3,7 +3,8 @@ import { SpeakerButton } from "@/components/speaker-button";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { addXP, completeMission } from "@/lib/progress";
-import { RefreshCw, ChevronRight, Star } from "lucide-react";
+import { RefreshCw, ChevronRight, Star, Volume2 } from "lucide-react";
+import { useTTS } from "@/hooks/use-tts";
 import mascoteImg from "@/assets/mascote.png";
 
 // ── Banco de termos cívicos (24 termos + FREE central) ──────────────────────
@@ -85,11 +86,11 @@ function Confetti() {
 
 // ── Componente principal ─────────────────────────────────────────────────────
 export default function Academia() {
+  const { speak: speakTerm } = useTTS();
   const [grid, setGrid] = useState<Array<{ term: string; definition: string } | null>>(() => buildGrid());
   const [callOrder, setCallOrder] = useState<number[]>(() => shuffle([...Array(24).keys()])); // índices 0-23 do TERMS original
   const [callIdx, setCallIdx] = useState(0);
   const [marked, setMarked] = useState<Set<number>>(() => new Set([12])); // FREE marcado
-  const [newBingoLines, setNewBingoLines] = useState<number[][]>([]);
   const [celebratedLines, setCelebratedLines] = useState<Set<string>>(new Set());
   const [showBingo, setShowBingo] = useState(false);
   const [bingoXP, setBingoXP] = useState(0);
@@ -144,7 +145,6 @@ export default function Academia() {
       const newCelebrated = new Set(celebratedLines);
       justBingo.forEach(l => newCelebrated.add(l.join(",")));
       setCelebratedLines(newCelebrated);
-      setNewBingoLines(justBingo);
       setShowBingo(true);
       setConfetti(true);
       setTimeout(() => setConfetti(false), 2200);
@@ -171,7 +171,6 @@ export default function Academia() {
     setCallOrder(shuffle([...Array(24).keys()]));
     setCallIdx(0);
     setMarked(new Set([12]));
-    setNewBingoLines([]);
     setCelebratedLines(new Set());
     setShowBingo(false);
     setShowCertificate(false);
@@ -275,7 +274,7 @@ export default function Academia() {
           </div>
 
           {/* Células */}
-          <div className="grid grid-cols-5 gap-1">
+          <div className="grid grid-cols-5 gap-1.5">
             {grid.map((cell, pos) => {
               const isFree = cell === null;
               const isMarked = marked.has(pos);
@@ -284,18 +283,15 @@ export default function Academia() {
               const isClickable = cell && isCallable && !isMarked;
 
               return (
-                <motion.button
+                <motion.div
                   key={pos}
                   onClick={() => handleCellClick(pos)}
-                  disabled={!isClickable}
-                  whileHover={isClickable ? { scale: 1.04 } : {}}
-                  whileTap={isClickable ? { scale: 0.96 } : {}}
-                  className="relative flex items-center justify-center rounded-lg text-center font-bold transition-all"
+                  whileHover={isClickable ? { scale: 1.03 } : {}}
+                  whileTap={isClickable ? { scale: 0.97 } : {}}
+                  className="relative flex flex-col items-center justify-center rounded-xl text-center font-bold transition-all select-none"
                   style={{
-                    aspectRatio: "1",
-                    fontSize: "clamp(8px, 1.3vw, 13px)",
-                    lineHeight: 1.2,
-                    padding: "4px",
+                    minHeight: "100px",
+                    padding: "10px 6px 28px",
                     cursor: isClickable ? "pointer" : "default",
                     background: isFree
                       ? "#1a2744"
@@ -307,12 +303,12 @@ export default function Academia() {
                       ? "#FEF9EC"
                       : "#F3F4F6",
                     border: isHighlighted
-                      ? "2px solid #F59E0B"
+                      ? "2.5px solid #F59E0B"
                       : isMarked
-                      ? "2px solid #D97706"
+                      ? "2.5px solid #D97706"
                       : isCallable
-                      ? "2px solid #F59E0B"
-                      : "2px solid #E5E7EB",
+                      ? "2.5px solid #F59E0B"
+                      : "2.5px solid #E5E7EB",
                     color: isFree
                       ? "#F59E0B"
                       : isMarked || isHighlighted
@@ -323,16 +319,31 @@ export default function Academia() {
                   }}
                 >
                   {isFree ? (
-                    <img src={mascoteImg} alt="FREE" className="h-10 w-10 rounded-full object-cover" />
-                  ) : isMarked ? (
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-base">✓</span>
-                      <span style={{ fontSize: "clamp(7px, 1.1vw, 11px)" }}>{cell!.term}</span>
-                    </div>
+                    <img src={mascoteImg} alt="FREE" className="h-12 w-12 rounded-full object-cover" />
                   ) : (
-                    <span className="px-0.5">{cell!.term}</span>
+                    <>
+                      {isMarked && (
+                        <span className="absolute top-1.5 left-1.5 text-lg leading-none">✓</span>
+                      )}
+                      <span
+                        className="leading-snug font-bold"
+                        style={{ fontSize: "clamp(20px, 1.6vw, 22px)", hyphens: "auto" }}
+                      >
+                        {cell!.term}
+                      </span>
+                      {/* TTS por célula — acessível para todos os termos */}
+                      <button
+                        type="button"
+                        aria-label={`Ouvir: ${cell!.term}`}
+                        onClick={(e) => { e.stopPropagation(); speakTerm(cell!.term); }}
+                        className="absolute bottom-1.5 right-1.5 rounded-full p-1 transition-colors hover:bg-black/10"
+                        style={{ color: isMarked || isHighlighted ? "#1a2744" : isCallable ? "#F59E0B" : "#9CA3AF" }}
+                      >
+                        <Volume2 className="h-4 w-4" />
+                      </button>
+                    </>
                   )}
-                </motion.button>
+                </motion.div>
               );
             })}
           </div>
