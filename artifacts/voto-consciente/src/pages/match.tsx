@@ -71,12 +71,12 @@ function CandidateProposalDetail({ candidate, answers }: { candidate: Candidate 
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card className="overflow-hidden border-2 border-border shadow-sm">
+    <Card className="overflow-hidden border border-border shadow-sm bg-white">
       <CardContent className="p-0">
         <div className="flex items-center p-4 gap-4 bg-muted/30">
-          <div className="text-5xl bg-background p-2 rounded-xl shadow-sm">{candidate.photo}</div>
+          <div className="text-5xl bg-white p-2 rounded-xl shadow-sm border border-border">{candidate.photo}</div>
           <div className="flex-1">
-            <h3 className="text-2xl font-bold">{candidate.name}</h3>
+            <h3 className="text-2xl font-bold text-foreground">{candidate.name}</h3>
             <p className="text-lg text-muted-foreground">{candidate.party}</p>
           </div>
           <div className="text-right">
@@ -91,7 +91,7 @@ function CandidateProposalDetail({ candidate, answers }: { candidate: Candidate 
           />
         </div>
         <button
-          className="w-full flex items-center justify-center gap-2 py-3 text-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 text-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors bg-white"
           onClick={() => setExpanded(e => !e)}
           data-testid={`button-expand-candidate-${candidate.name.replace(/\s+/g, '-')}`}
         >
@@ -99,7 +99,7 @@ function CandidateProposalDetail({ candidate, answers }: { candidate: Candidate 
           {expanded ? "Ocultar propostas" : "Ver propostas por tema"}
         </button>
         {expanded && (
-          <div className="border-t divide-y">
+          <div className="border-t divide-y bg-white">
             {THEMES.map(theme => {
               const candidateChoice = candidate.proposals[theme.id];
               const userChoice = answers[theme.id];
@@ -107,14 +107,14 @@ function CandidateProposalDetail({ candidate, answers }: { candidate: Candidate 
               const candidateOption = theme.options.find(o => o.id === candidateChoice);
               const userOption = theme.options.find(o => o.id === userChoice);
               return (
-                <div key={theme.id} className={`p-4 ${matches ? 'bg-green-50' : 'bg-red-50'}`}>
+                <div key={theme.id} className={`p-4 ${matches ? 'bg-green-50/50' : 'bg-red-50/50'}`}>
                   <div className="flex items-center gap-2 mb-2">
                     {matches
                       ? <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
                       : <XCircle className="h-5 w-5 text-red-500 shrink-0" />}
-                    <span className="font-bold text-lg uppercase tracking-wide">{theme.title}</span>
+                    <span className="font-bold text-lg uppercase tracking-wide text-foreground">{theme.title}</span>
                   </div>
-                  <div className="space-y-1 pl-7">
+                  <div className="space-y-1 pl-7 text-foreground">
                     <p className="text-base"><span className="font-semibold">Você:</span> {userOption?.text}</p>
                     <p className="text-base"><span className="font-semibold">{candidate.name.split(' ')[0]}:</span> {candidateOption?.text}</p>
                   </div>
@@ -159,10 +159,10 @@ export default function Match() {
 
   if (!started) {
     return (
-      <div className="flex flex-col items-center py-6 min-h-[70vh]">
+      <div className="flex flex-col items-center py-6 min-h-[70vh] max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <div className="text-6xl bg-green-50 p-6 rounded-full inline-block mb-4">🤝</div>
-          <h1 className="text-4xl font-extrabold text-primary mb-2">Match de Candidatos</h1>
+          <div className="text-6xl bg-primary/10 p-6 rounded-full inline-block mb-4">🤝</div>
+          <h1 className="text-4xl font-extrabold text-foreground mb-2">Match de Candidatos</h1>
           <p className="text-xl text-muted-foreground">Descubra quais candidatos fictícios mais combinam com suas ideias.</p>
         </div>
         
@@ -180,11 +180,11 @@ export default function Match() {
       .sort((a, b) => b.match - a.match);
 
     return (
-      <div className="py-4 space-y-6 pb-8">
+      <div className="py-4 space-y-6 pb-8 max-w-3xl mx-auto">
         <Disclaimer />
         
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold">Seus Resultados</h2>
+          <h2 className="text-3xl font-bold text-foreground">Seus Resultados</h2>
           <p className="text-xl text-muted-foreground">Veja a compatibilidade com suas respostas.</p>
         </div>
 
@@ -206,14 +206,14 @@ export default function Match() {
   const theme = THEMES[currentTheme];
 
   return (
-    <div className="flex flex-col min-h-[70vh] py-4">
+    <div className="flex flex-col min-h-[70vh] py-4 max-w-2xl mx-auto">
       <div className="mb-6 text-center">
         <span className="font-bold text-lg text-muted-foreground uppercase tracking-widest mb-2 block">Tema {currentTheme + 1} de {THEMES.length}</span>
         <div className="w-full bg-muted rounded-full h-3 mb-6">
           <div className="bg-primary h-3 rounded-full transition-all duration-300" style={{ width: `${((currentTheme) / THEMES.length) * 100}%` }} />
         </div>
-        <h2 className="text-4xl font-extrabold text-primary">{theme.title}</h2>
-        <p className="text-xl mt-2 font-medium">O que você considera mais importante?</p>
+        <h2 className="text-4xl font-extrabold text-foreground">{theme.title}</h2>
+        <p className="text-xl mt-2 font-medium text-muted-foreground">O que você considera mais importante?</p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -228,14 +228,14 @@ export default function Match() {
             <Button 
               key={opt.id}
               variant="outline"
-              className="h-auto py-6 px-6 text-left justify-start text-2xl font-medium border-2 hover:bg-primary/5 hover:border-primary whitespace-normal"
+              className="h-auto py-6 px-6 text-left justify-start text-2xl font-medium border-2 hover:bg-primary/5 hover:border-primary whitespace-normal bg-white"
               onClick={() => handleAnswer(opt.id)}
               data-testid={`button-match-option-${opt.id}`}
             >
-              <span className="bg-muted text-muted-foreground w-10 h-10 rounded-full flex items-center justify-center shrink-0 mr-4 font-bold">
+              <span className="bg-muted text-muted-foreground w-10 h-10 rounded-full flex items-center justify-center shrink-0 mr-4 font-bold border border-border">
                 {opt.id}
               </span>
-              {opt.text}
+              <span className="text-foreground">{opt.text}</span>
             </Button>
           ))}
         </motion.div>

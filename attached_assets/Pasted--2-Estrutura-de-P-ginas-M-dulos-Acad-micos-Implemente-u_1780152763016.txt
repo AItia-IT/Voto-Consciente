@@ -1,0 +1,19 @@
+### 2. Estrutura de Páginas / Módulos Acadêmicos
+Implemente um sistema de abas ou rotas dinâmicas com as seguintes seções:
+
+- **Início / Boas-vindas:** Mensagem acolhedora da mascote reforçando que "não existem respostas erradas" e que "experiência de vida não tem idade". Botão de destaque "[Começar]".
+- **Academia da Democracia:** Uma trilha de aprendizado gamificada em formato de missões sequenciais (as próximas missões ficam bloqueadas com um ícone de cadeado até que a anterior seja concluída). 
+  * Missão 1: "Quem cria as leis? (Toque para começar)"
+  * Missão 2: "Quem fiscaliza o governo? (Conclua a anterior para liberar)"
+  * Missão 3: "Como funciona uma eleição?"
+  * Missão 4: "Quais são os seus direitos?"
+- **Fake ou Fato?:** Um mini-quiz interativo com manchetes simuladas onde o usuário clica em botões grandes e coloridos: "✅ Fato" ou "❌ Fake". Independente da escolha do usuário, mostre uma resposta empática da mascote ("Excelente tentativa! Vamos descobrir juntos...") seguida da explicação didática destacando a Fonte, Data e Contexto.
+- **Match / Descobrindo Candidatos:** Um painel neutro de perguntas sobre prioridades (Saúde, Educação, Segurança, Transporte) que gera um gráfico simples e amigável mostrando a compatibilidade de propostas com candidatos fictícios, exibindo o aviso: "Sua escolha continua sendo totalmente livre".
+- **Meu Painel:** Exibição do progresso do usuário com conquistas visuais, estrelas acumuladas e medalhas conquistadas de forma lúdica.
+
+### 3. Requisitos Técnicos de Acessibilidade (Crucial)
+- Código limpo usando HTML5, CSS3 modernos (ou Tailwind) e JavaScript (ou React/Vite se preferir uma SPA).
+- Fontes altamente legíveis com opção acessível de aumentar/diminuir o tamanho do texto.
+- Elementos interativos grandes para facilitar o clique/toque em dispositivos móveis e tablets.
+- Transições de tela e animações de feedback suaves para não causar confusão visual ou insegurança no usuário.
+- Inclua suporte simulado para audiodescrição ou leitura de tela nos balões da mascote.

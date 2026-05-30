@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2 } from "lucide-react";
 import { useCreateOpenaiConversation } from "@workspace/api-client-react";
+import mascoteImg from "@/assets/mascote.png";
 
 type Message = {
   id: string;
@@ -118,30 +119,30 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-card border border-border rounded-2xl overflow-hidden shadow-sm relative">
+    <div className="flex flex-col h-[calc(100vh-140px)] bg-white border border-border rounded-2xl overflow-hidden shadow-sm relative max-w-4xl mx-auto">
       {/* Header */}
-      <div className="bg-primary/10 border-b p-4 flex items-center gap-4 shrink-0">
-        <div className="text-4xl bg-background rounded-full p-1 shadow-sm">🧑‍🏫</div>
+      <div className="bg-muted/30 border-b p-4 flex items-center gap-4 shrink-0">
+        <img src={mascoteImg} alt="Sônia" className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm shrink-0" />
         <div>
-          <h2 className="font-extrabold text-xl">Sônia</h2>
+          <h2 className="font-extrabold text-xl text-foreground">Sônia</h2>
           <p className="text-muted-foreground font-medium text-sm">Sua professora digital</p>
         </div>
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
         {messages.map((m) => (
           <div key={m.id} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`max-w-[85%] rounded-2xl p-4 text-xl leading-relaxed shadow-sm ${
               m.role === 'user' 
                 ? 'bg-primary text-primary-foreground rounded-tr-sm' 
-                : 'bg-muted rounded-tl-sm text-foreground'
+                : 'bg-muted/50 rounded-tl-sm text-foreground border border-border'
             }`}>
               {m.content || (m.role === 'assistant' && <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />)}
             </div>
             {m.role === 'assistant' && m.content && (
               <div className="mt-2 ml-2">
-                <SpeakerButton text={m.content} className="h-10 w-10 bg-background shadow-sm" />
+                <SpeakerButton text={m.content} className="h-10 w-10 bg-white shadow-sm border border-border" />
               </div>
             )}
           </div>
@@ -149,14 +150,14 @@ export default function Chat() {
       </div>
 
       {/* Input area */}
-      <div className="p-4 bg-background border-t shrink-0">
+      <div className="p-4 bg-white border-t shrink-0">
         <div className="flex overflow-x-auto pb-4 gap-2 no-scrollbar">
           {SUGGESTIONS.map(s => (
             <button 
               key={s}
               onClick={() => sendMessage(s)}
               disabled={isLoading}
-              className="whitespace-nowrap bg-muted hover:bg-muted/80 text-foreground px-4 py-2 rounded-full font-medium text-sm border transition-colors disabled:opacity-50"
+              className="whitespace-nowrap bg-muted/50 hover:bg-muted text-foreground px-4 py-2 rounded-full font-medium text-sm border border-border transition-colors disabled:opacity-50"
             >
               {s}
             </button>
@@ -171,13 +172,13 @@ export default function Chat() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Digite sua pergunta..."
             disabled={isLoading}
-            className="flex-1 h-16 text-xl rounded-xl bg-muted border-transparent focus-visible:ring-primary"
+            className="flex-1 h-16 text-xl rounded-xl bg-muted/30 border-border focus-visible:ring-primary"
             data-testid="input-chat"
           />
           <Button 
             type="submit" 
             disabled={isLoading || !input.trim()} 
-            className="h-16 w-16 rounded-xl shadow-md shrink-0"
+            className="h-16 w-16 rounded-xl shadow-md shrink-0 bg-primary hover:bg-primary/90"
             data-testid="button-send-chat"
           >
             {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Send className="h-8 w-8" />}

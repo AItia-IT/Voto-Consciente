@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { addQuizScore, addMedal, getQuizMedals } from "@/lib/progress";
+import mascoteImg from "@/assets/mascote.png";
 
 type QuizItem = { id: number; text: string; isFake: boolean; explanation: string };
 
@@ -95,9 +96,9 @@ export default function Quiz() {
 
   if (!started) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 max-w-md mx-auto">
         <div className="text-6xl bg-primary/10 p-6 rounded-full">🧠</div>
-        <h1 className="text-4xl font-bold">Fake ou Fato?</h1>
+        <h1 className="text-4xl font-bold text-foreground">Fake ou Fato?</h1>
         <p className="text-xl max-w-[250px] mx-auto text-muted-foreground">
           Leia a mensagem e diga se é uma notícia falsa ou informação verdadeira. Vamos testar seus conhecimentos!
         </p>
@@ -110,18 +111,18 @@ export default function Quiz() {
 
   if (finished) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-center space-y-6">
+      <div className="flex flex-col items-center justify-center py-10 text-center space-y-6 max-w-md mx-auto">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-7xl">🏆</motion.div>
-        <h2 className="text-4xl font-bold">Quiz Concluído!</h2>
+        <h2 className="text-4xl font-bold text-foreground">Quiz Concluído!</h2>
         <p className="text-2xl text-muted-foreground">Sua pontuação: <span className="font-bold text-primary">{score}</span> / {QUIZ_ITEMS.length * 10}</p>
         
         {earnedMedals.length > 0 && (
           <div className="w-full bg-accent/20 p-6 rounded-2xl border border-accent">
-            <h3 className="font-bold text-xl mb-4">Novas Medalhas Desbloqueadas:</h3>
+            <h3 className="font-bold text-xl mb-4 text-foreground">Novas Medalhas Desbloqueadas:</h3>
             <div className="flex flex-col gap-3">
               {earnedMedals.map(m => (
                 <div key={m} className="bg-card p-3 rounded-lg flex items-center justify-center shadow-sm">
-                  <span className="text-xl font-bold">{m}</span>
+                  <span className="text-xl font-bold text-foreground">{m}</span>
                 </div>
               ))}
             </div>
@@ -138,7 +139,7 @@ export default function Quiz() {
   const current = QUIZ_ITEMS[currentIndex];
 
   return (
-    <div className="max-w-md mx-auto py-4 flex flex-col min-h-[70vh]">
+    <div className="max-w-xl mx-auto py-4 flex flex-col min-h-[70vh]">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="font-bold text-lg text-muted-foreground">Questão {currentIndex + 1} de {QUIZ_ITEMS.length}</span>
@@ -158,29 +159,29 @@ export default function Quiz() {
             exit={{ opacity: 0, x: -20 }}
             className="flex-1 flex flex-col"
           >
-            <Card className="mb-8 border-2">
+            <Card className="mb-8 border-2 border-primary/10 bg-white">
               <CardContent className="p-6 md:p-8 flex flex-col items-center text-center relative pt-12">
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-card border-2 p-2 rounded-full shadow-sm">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-white border-2 border-primary/20 p-2 rounded-full shadow-sm">
                   <SpeakerButton text={current.text} className="h-10 w-10 border-0" />
                 </div>
-                <p className="text-2xl font-medium leading-relaxed italic">
+                <p className="text-2xl font-medium leading-relaxed italic text-foreground">
                   {current.text}
                 </p>
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 gap-4 mt-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
               <Button 
                 onClick={() => handleAnswer(true)} 
                 variant="destructive" 
-                className="h-20 text-2xl shadow-md font-bold"
+                className="h-20 text-2xl shadow-md font-bold w-full"
                 data-testid="button-answer-fake"
               >
                 📰 Fake News
               </Button>
               <Button 
                 onClick={() => handleAnswer(false)} 
-                className="h-20 text-2xl shadow-md font-bold bg-green-600 hover:bg-green-700"
+                className="h-20 text-2xl shadow-md font-bold bg-green-600 hover:bg-green-700 w-full"
                 data-testid="button-answer-fact"
               >
                 ✅ Verdade
@@ -194,12 +195,20 @@ export default function Quiz() {
             animate={{ opacity: 1, scale: 1 }}
             className="flex-1 flex flex-col"
           >
-            <div className={`p-8 rounded-2xl mb-6 text-center shadow-lg border-2 ${feedback.isCorrect ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
-              <div className="text-5xl mb-4">{feedback.isCorrect ? '👏' : '❌'}</div>
-              <h2 className="text-3xl font-bold mb-6">{feedback.isCorrect ? 'Você Acertou!' : 'Você Errou...'}</h2>
-              <div className="bg-white/60 p-5 rounded-xl text-left relative">
-                <p className="text-xl leading-relaxed pr-12">{feedback.explanation}</p>
-                <div className="absolute top-4 right-2">
+            <div className={`p-6 rounded-2xl mb-6 shadow-lg border-2 ${feedback.isCorrect ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+              <div className="flex flex-col md:flex-row items-center gap-6 mb-6">
+                <img src={mascoteImg} alt="Sônia" className="h-24 w-24 rounded-full object-cover border-4 border-white shadow-sm shrink-0" />
+                <div className="text-center md:text-left flex-1">
+                    <div className="text-4xl mb-2">{feedback.isCorrect ? '👏' : '❌'}</div>
+                    <h2 className="text-3xl font-bold">{feedback.isCorrect ? 'Você Acertou!' : 'Você Errou...'}</h2>
+                    <p className="text-lg font-medium opacity-80 mt-1">
+                        {feedback.isCorrect ? 'Muito bem! Você está aprendendo rápido.' : 'Excelente tentativa! Vamos descobrir juntos...'}
+                    </p>
+                </div>
+              </div>
+              <div className="bg-white p-5 rounded-xl text-left relative shadow-sm border border-black/5">
+                <p className="text-xl leading-relaxed pr-12 text-foreground font-medium">{feedback.explanation}</p>
+                <div className="absolute top-4 right-4">
                   <SpeakerButton text={feedback.explanation} />
                 </div>
               </div>
