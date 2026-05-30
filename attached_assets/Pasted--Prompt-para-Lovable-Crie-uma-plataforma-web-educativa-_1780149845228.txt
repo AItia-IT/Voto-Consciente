@@ -1,0 +1,201 @@
+**Prompt para Lovable**
+
+Crie uma plataforma web educativa, acessível e gamificada chamada **"Voto Consciente"**, voltada principalmente para idosos, com o objetivo de fortalecer a alfabetização digital, o pensamento crítico e a educação democrática de forma simples, amigável e divertida.
+
+### Objetivos da Plataforma
+
+* Ajudar usuários a identificar notícias falsas e informações confiáveis.
+* Ensinar conceitos básicos sobre democracia, cidadania e funcionamento das instituições.
+* Permitir que usuários conheçam melhor candidatos através de um sistema de compatibilidade baseado em propostas e opiniões, sem influenciar ou recomendar votos.
+* Promover autonomia, senso crítico e participação cidadã.
+
+---
+
+# Design e Experiência
+
+### Público-alvo
+
+* Pessoas acima de 60 anos.
+* Baixa ou média familiaridade com tecnologia.
+
+### Estilo visual
+
+* Lúdico, acolhedor e intuitivo.
+* Cores suaves e contrastes adequados para acessibilidade.
+* Ícones grandes e fáceis de identificar.
+* Tipografia grande e altamente legível.
+* Animações leves e amigáveis.
+* Personagem guia virtual (mascote) que acompanha o usuário durante a jornada.
+
+### Acessibilidade
+
+* Botão para aumentar fonte.
+* Leitor de texto (Text-to-Speech).
+* Navegação simplificada.
+* Modo de alto contraste.
+* Linguagem clara e sem termos técnicos complexos.
+
+---
+
+# Funcionalidade 1: Quiz "Fake ou Fato?"
+
+### Objetivo
+
+Ensinar usuários a reconhecer desinformação.
+
+### Funcionamento
+
+* Apresentar manchetes, imagens, vídeos ou mensagens simuladas.
+* O usuário deve escolher:
+
+  * Fake News
+  * Informação Confiável
+
+### Após cada resposta
+
+Mostrar explicação educativa:
+
+* Quais sinais indicavam que era falsa.
+* Como verificar fontes.
+* O que observar antes de compartilhar.
+
+### Gamificação
+
+* Pontos.
+* Medalhas.
+* Níveis.
+* Barra de progresso.
+* Conquistas especiais.
+
+Exemplos:
+
+* Caçador de Fake News
+* Verificador de Fontes
+* Guardião da Informação
+
+---
+
+# Funcionalidade 2: Academia da Democracia
+
+### Objetivo
+
+Ensinar democracia de forma simples e interativa.
+
+### Conteúdos
+
+* O que é democracia.
+* Separação dos poderes.
+* Função de prefeitos, vereadores, governadores, deputados, senadores e presidente.
+* Como funcionam as eleições.
+* Direitos e deveres dos cidadãos.
+
+### Formato
+
+Transformar cada tema em uma missão.
+
+Exemplo:
+
+Missão 1:
+"Quem cria as leis?"
+
+Missão 2:
+"Quem fiscaliza o governo?"
+
+Missão 3:
+"Como funciona uma eleição?"
+
+### Gamificação
+
+* Sistema de experiência (XP).
+* Certificados digitais.
+* Ranking pessoal (não competitivo).
+* Jornada visual de aprendizado.
+
+---
+
+# Funcionalidade 3: Match de Candidatos
+
+### Princípio Fundamental
+
+O sistema deve ser totalmente neutro.
+
+Não recomendar candidatos.
+
+Não classificar candidatos como melhores ou piores.
+
+Não emitir opiniões políticas.
+
+### Objetivo
+
+Permitir que o usuário descubra quais candidatos possuem propostas mais alinhadas com suas opiniões.
+
+### Funcionamento
+
+O usuário responde perguntas sobre temas como:
+
+* Saúde
+* Educação
+* Segurança
+* Transporte
+* Economia
+* Meio Ambiente
+* Inclusão Social
+
+Após responder:
+
+* Mostrar percentual de compatibilidade com cada candidato.
+* Mostrar propostas relacionadas aos temas escolhidos.
+* Exibir comparações lado a lado.
+
+### Regras importantes
+
+Exibir aviso:
+
+> "Esta ferramenta tem caráter exclusivamente informativo. O objetivo é apresentar informações de forma neutra para apoiar sua própria análise. A decisão de voto é sempre livre e individual."
+
+---
+
+# Dashboard do Usuário
+
+Mostrar:
+
+* Nível atual.
+* Pontuação acumulada.
+* Quizzes concluídos.
+* Certificados conquistados.
+* Progresso na Academia da Democracia.
+* Histórico de aprendizado.
+
+---
+
+# Inteligência Artificial
+
+Adicionar assistente virtual educativo.
+
+Capacidades:
+
+* Explicar conceitos políticos em linguagem simples.
+* Explicar como identificar notícias falsas.
+* Responder dúvidas sobre cidadania.
+* Incentivar pensamento crítico.
+
+Restrições:
+
+* Não apoiar partidos.
+* Não apoiar candidatos.
+* Não persuadir usuários politicamente.
+* Não realizar recomendações de voto.
+
+---
+
+# Tecnologias
+
+* Frontend: React + Next.js.
+* Backend: Supabase.
+* Autenticação simples.
+* Banco de dados para quizzes, conteúdos e perfis.
+* Interface responsiva para desktop, tablet e celular.
+
+### Resultado esperado
+
+Uma plataforma moderna, acessível, gamificada e educativa que ajude idosos a navegar com mais segurança no ambiente digital, compreender melhor o funcionamento da democracia e conhecer informações sobre candidatos de maneira transparente, neutra e sem interferir em sua liberdade de escolha.
