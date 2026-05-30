@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { SpeakerButton } from "@/components/speaker-button";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,15 +22,15 @@ const TERMS: { term: string; definition: string }[] = [
   { term: "Título de Eleitor", definition: "Documento obrigatório para votar. Todo brasileiro deve ter a partir dos 18 anos." },
   { term: "Voto Facultativo", definition: "O jovem de 16 ou 17 anos pode votar se quiser, assim como quem tem mais de 70 anos." },
   { term: "Voto Obrigatório", definition: "Todo brasileiro entre 18 e 70 anos é obrigado a votar nas eleições." },
-  { term: "Zona Eleitoral", definition: "Local onde o eleitor é cadastrado para votar, geralmente próximo à sua residência." },
+  { term: "STF", definition: "Supremo Tribunal Federal — a mais alta corte do Judiciário brasileiro, guarda a Constituição." },
   { term: "Candidato", definition: "Pessoa que se apresenta para disputar um cargo público em uma eleição." },
   { term: "Partido Político", definition: "Organização de pessoas com ideias parecidas que se unem para disputar eleições e governar." },
   { term: "Coligação", definition: "União de dois ou mais partidos políticos para disputar uma eleição juntos." },
   { term: "Aos Fatos", definition: "Agência de jornalismo especializada em checar e desmentir notícias falsas no Brasil." },
-  { term: "STF", definition: "Supremo Tribunal Federal — a mais alta corte do Judiciário brasileiro, guarda a Constituição." },
   { term: "Câmara dos Deputados", definition: "Parte do Congresso Nacional que representa o povo. Tem 513 deputados federais." },
   { term: "Senado Federal", definition: "Parte do Congresso Nacional que representa os estados. Tem 81 senadores." },
   { term: "Transparência", definition: "Direito do cidadão de acessar informações sobre como o governo usa o dinheiro público." },
+  { term: "Zona Eleitoral", definition: "Local onde o eleitor é cadastrado para votar, geralmente próximo à sua residência." },
 ];
 
 function shuffle<T>(arr: T[]): T[] {
@@ -42,19 +42,12 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// Bingo grid: 4×4 = 16 cells; index 5 is FREE (row 1, col 1)
-const FREE_IDX = 5;
-function buildGrid(terms: typeof TERMS) {
-  const shuffled = shuffle(terms).slice(0, 15);
-  const grid: Array<{ term: string; definition: string } | null> = [];
-  for (let i = 0; i < 16; i++) {
-    if (i === FREE_IDX) grid.push(null); // FREE
-    else grid.push(shuffled[i < FREE_IDX ? i : i - 1]);
-  }
-  return grid;
+// 4×4 grid = 16 cells, all with terms (no FREE)
+function buildGrid() {
+  return shuffle(TERMS).slice(0, 16);
 }
 
-// All winning lines for 4×4 (rows + cols + diagonals)
+// All winning lines for 4×4
 const LINES = [
   [0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15], // rows
   [0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15], // cols
@@ -66,17 +59,15 @@ function checkBingo(marked: Set<number>): number[][] {
 }
 
 function initGame() {
-  const grid = buildGrid(TERMS);
-  // callOrder only uses the 15 terms actually on the grid
-  const gridTerms = grid.filter(Boolean) as { term: string; definition: string }[];
-  const callOrder = shuffle(gridTerms);
+  const grid = buildGrid();
+  const callOrder = shuffle([...grid]);
   return { grid, callOrder };
 }
 
 export default function Bingo() {
   const [{ grid, callOrder }, setGame] = useState(() => initGame());
   const [callIndex, setCallIndex] = useState(0);
-  const [marked, setMarked] = useState<Set<number>>(() => new Set([FREE_IDX])); // FREE
+  const [marked, setMarked] = useState<Set<number>>(() => new Set());
   const [bingoLines, setBingoLines] = useState<number[][]>([]);
   const [xpAwarded, setXpAwarded] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
@@ -87,7 +78,6 @@ export default function Bingo() {
   const currentCall = callOrder[callIndex] ?? null;
 
   const handleCellClick = useCallback((idx: number) => {
-    if (idx === FREE_IDX) return; // FREE — already marked
     const cell = grid[idx];
     if (!cell || !currentCall) return;
     if (marked.has(idx)) return;
@@ -97,7 +87,6 @@ export default function Bingo() {
       newMarked.add(idx);
       const lines = checkBingo(newMarked);
 
-      // Award XP for new bingo lines
       const newLinesCount = lines.length - prevBingoCount;
       if (newLinesCount > 0) {
         const xp = newLinesCount * 100;
@@ -111,20 +100,17 @@ export default function Bingo() {
       setBingoLines(lines);
       setMarked(newMarked);
 
-      // Check if full board complete
       if (newMarked.size === 16) {
-        completeMission(99); // special bingo mission id
+        completeMission(99);
         addXP(200);
         setXpAwarded(prev => prev + 200);
         setTimeout(() => setShowComplete(true), 600);
       }
 
-      // Advance call
       if (callIndex + 1 < callOrder.length) {
         setCallIndex(c => c + 1);
       }
     } else {
-      // Wrong cell flash
       setWrongCell(idx);
       setTimeout(() => setWrongCell(null), 600);
     }
@@ -133,7 +119,7 @@ export default function Bingo() {
   const newGame = useCallback(() => {
     setGame(initGame());
     setCallIndex(0);
-    setMarked(new Set([FREE_IDX]));
+    setMarked(new Set());
     setBingoLines([]);
     setPrevBingoCount(0);
     setShowComplete(false);
@@ -155,10 +141,10 @@ export default function Bingo() {
           <h1 className="text-3xl font-extrabold text-yellow-800 mb-2">CARTELA COMPLETA!</h1>
           <h2 className="text-xl font-bold text-yellow-900 mb-4">Cidadão Democrata</h2>
           <p className="text-lg text-yellow-700 mb-4">
-            Você acertou todos os 15 termos cívicos! Incrível!
+            Você acertou todos os 16 termos cívicos! Incrível!
           </p>
           <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full font-bold text-lg">
-            🏆 +{xpAwarded + 200} XP ganhos!
+            🏆 +{xpAwarded} XP ganhos!
           </div>
         </div>
         <Button
@@ -218,10 +204,10 @@ export default function Bingo() {
         )}
       </motion.div>
 
-      {/* XP + Bingo count bar */}
+      {/* Status bar */}
       <div className="flex items-center justify-between mb-3 px-1">
         <span className="text-sm font-bold" style={{ color: "#6B7280" }}>
-          ✅ {marked.size - 1}/15 marcados
+          ✅ {marked.size}/16 marcados
         </span>
         {bingoLines.length > 0 && (
           <span className="text-sm font-bold px-3 py-1 rounded-full"
@@ -259,7 +245,6 @@ export default function Bingo() {
       <div className="grid grid-cols-4 gap-2">
         {grid.map((cell, idx) => {
           const isMarked = marked.has(idx);
-          const isFree = idx === FREE_IDX;
           const isBingo = isBingoCell(idx);
           const isWrong = wrongCell === idx;
 
@@ -267,45 +252,36 @@ export default function Bingo() {
             <motion.button
               key={idx}
               onClick={() => handleCellClick(idx)}
-              whileTap={!isMarked && !isFree ? { scale: 0.93 } : {}}
+              whileTap={!isMarked ? { scale: 0.93 } : {}}
               animate={isWrong ? { x: [-6, 6, -4, 4, 0] } : {}}
               transition={isWrong ? { duration: 0.35 } : { type: "spring", stiffness: 300 }}
-              className="relative aspect-square rounded-xl flex items-center justify-center text-center p-1 text-xs font-bold leading-tight transition-colors focus:outline-none select-none"
+              className="relative aspect-square rounded-xl flex items-center justify-center text-center p-2 font-bold leading-tight focus:outline-none select-none"
               style={{
-                background: isFree
-                  ? "#1a2744"
-                  : isBingo
+                background: isBingo
                   ? "#F59E0B"
                   : isMarked
                   ? "#10B981"
                   : isWrong
                   ? "#FEE2E2"
                   : "#fff",
-                color: isFree
-                  ? "#fff"
-                  : isBingo || isMarked
+                color: isBingo || isMarked
                   ? "#fff"
                   : isWrong
                   ? "#DC2626"
                   : "#1a2744",
-                border: `2px solid ${isFree ? "#1a2744" : isBingo ? "#D97706" : isMarked ? "#059669" : "#E5E7EB"}`,
-                cursor: isMarked || isFree ? "default" : "pointer",
+                border: `2px solid ${isBingo ? "#D97706" : isMarked ? "#059669" : "#E5E7EB"}`,
+                cursor: isMarked ? "default" : "pointer",
                 boxShadow: isBingo ? "0 0 0 3px #FDE68A" : undefined,
-                fontSize: "clamp(8px, 1.8vw, 11px)",
+                fontSize: "clamp(10px, 2.5vw, 13px)",
               }}
             >
-              {isFree ? (
-                <div className="flex flex-col items-center gap-0.5">
-                  <img src={mascoteImg} alt="FREE" className="h-7 w-7 rounded-full object-cover border-2 border-white" />
-                  <span className="text-white font-extrabold" style={{ fontSize: 9 }}>FREE</span>
-                </div>
-              ) : isMarked ? (
+              {isMarked ? (
                 <div className="flex flex-col items-center gap-0.5">
                   <span className="text-lg leading-none">✓</span>
-                  <span className="leading-tight">{cell?.term}</span>
+                  <span className="leading-tight">{cell.term}</span>
                 </div>
               ) : (
-                <span className="leading-tight px-0.5">{cell?.term}</span>
+                <span className="leading-tight px-0.5">{cell.term}</span>
               )}
             </motion.button>
           );
