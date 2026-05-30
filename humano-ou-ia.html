@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Humano ou IA? O Jogo da Verdade</title>
+  <style>
+    /* ── Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f172a;
+      --surface:  #1e293b;
+      --accent:   #38bdf8;
+      --accent2:  #818cf8;
+      --green:    #22c55e;
+      --red:      #f87171;
+      --text:     #f1f5f9;
+      --muted:    #94a3b8;
+      --radius:   18px;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    /* ── Layout ── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 24px 20px;
+      text-align: center;
+      animation: fadein .35s ease;
+    }
+    .screen.active { display: flex; }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Typography ── */
+    h1 { font-size: clamp(26px, 7vw, 42px); font-weight: 800; line-height: 1.2; }
+    h2 { font-size: clamp(22px, 5vw, 32px); font-weight: 700; }
+    p  { font-size: clamp(18px, 4vw, 22px); }
+
+    .emoji-big { font-size: clamp(52px, 15vw, 80px); display: block; margin-bottom: 12px; }
+    .chip {
+      display: inline-block;
+      background: var(--surface);
+      border: 2px solid var(--accent2);
+      border-radius: 999px;
+      padding: 4px 16px;
+      font-size: 16px;
+      color: var(--accent2);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px 24px;
+      border-radius: var(--radius);
+      border: none;
+      font-size: clamp(18px, 4vw, 22px);
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s, opacity .12s;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0f172a;
+      box-shadow: 0 4px 24px rgba(56,189,248,.35);
+    }
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 6px 32px rgba(56,189,248,.55);
+      transform: translateY(-2px);
+    }
+
+    .btn-human {
+      background: linear-gradient(135deg, #1d4ed8, #4f46e5);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(79,70,229,.4);
+    }
+    .btn-human:hover:not(:disabled) { transform: translateY(-2px); }
+
+    .btn-robot {
+      background: linear-gradient(135deg, #7c3aed, #a21caf);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(162,28,175,.4);
+    }
+    .btn-robot:hover:not(:disabled) { transform: translateY(-2px); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    .btn-outline:hover:not(:disabled) { background: rgba(56,189,248,.1); }
+
+    /* ── Stack ── */
+    .stack { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 2px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      padding: 24px 22px;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* ── Quote row ── */
+    .quote-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .quote-text {
+      flex: 1;
+      font-size: clamp(19px, 4.5vw, 24px);
+      line-height: 1.55;
+      color: var(--text);
+      text-align: left;
+    }
+    .speak-btn {
+      flex-shrink: 0;
+      background: rgba(56,189,248,.15);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      transition: background .15s, transform .12s;
+      margin-top: 2px;
+    }
+    .speak-btn:hover { background: rgba(56,189,248,.3); }
+    .speak-btn:active { transform: scale(0.93); }
+    .speak-btn[aria-pressed="true"] { background: rgba(56,189,248,.45); }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      width: 100%;
+      max-width: 520px;
+      background: var(--surface);
+      border-radius: 999px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 999px;
+      transition: width .4s ease;
+    }
+
+    /* ── Feedback ── */
+    .feedback-card {
+      display: none;
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      width: 100%;
+      max-width: 520px;
+      text-align: left;
+      animation: fadein .25s ease;
+    }
+    .feedback-card.correct {
+      background: rgba(34,197,94,.15);
+      border: 2px solid var(--green);
+    }
+    .feedback-card.wrong {
+      background: rgba(248,113,113,.12);
+      border: 2px solid var(--red);
+    }
+    .feedback-card.show { display: block; }
+
+    .feedback-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: clamp(18px, 4vw, 22px);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .feedback-header .icon { font-size: 28px; }
+    .feedback-header .speak-btn { margin-left: auto; flex-shrink: 0; }
+
+    .feedback-explain {
+      font-size: clamp(16px, 3.5vw, 19px);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* ── Score ── */
+    .score-big {
+      font-size: clamp(52px, 16vw, 90px);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .literacy-card {
+      background: rgba(129,140,248,.12);
+      border: 2px solid var(--accent2);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      max-width: 520px;
+      text-align: left;
+    }
+    .literacy-card h3 {
+      font-size: clamp(17px, 4vw, 21px);
+      margin-bottom: 8px;
+      color: var(--accent2);
+    }
+    .literacy-card p {
+      font-size: clamp(15px, 3.5vw, 18px);
+      color: var(--text);
+    }
+
+    /* ── Divider ── */
+    .divider { width: 48px; height: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; }
+
+    /* ── Spacing helpers ── */
+    .mb8  { margin-bottom: 8px; }
+    .mb12 { margin-bottom: 12px; }
+    .mb16 { margin-bottom: 16px; }
+    .mb24 { margin-bottom: 24px; }
+    .mt8  { margin-top: 8px; }
+    .mt16 { margin-top: 16px; }
+    .w-full { width: 100%; }
+    .max520 { max-width: 520px; }
+
+    /* ── Accessibility focus ── */
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     TELA 1 — Início
+══════════════════════════════════ -->
+<section id="screen-start" class="screen active" role="main" aria-label="Tela inicial">
+  <div class="stack">
+    <span class="emoji-big" aria-hidden="true">🤔</span>
+
+    <h1 class="mb8">Humano ou IA?</h1>
+    <p class="mb24" style="color:var(--muted); max-width:400px;">
+      O Jogo da Verdade
+    </p>
+
+    <div class="divider mb24"></div>
+
+    <p style="max-width:380px; margin-bottom:32px;">
+      Você consegue descobrir se uma notícia foi escrita por
+      <strong>uma pessoa</strong> ou por um <strong>robô de Inteligência Artificial</strong>?
+    </p>
+
+    <button class="btn btn-primary" id="btn-start" onclick="startGame()" aria-label="Iniciar o jogo">
+      🎮 Iniciar Jogo
+    </button>
+
+    <p style="font-size:15px; color:var(--muted); margin-top:24px;">
+      3 rodadas · Sem tempo limite · 100% gratuito
+    </p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     TELA 2 — Rodada
+══════════════════════════════════ -->
+<section id="screen-round" class="screen" role="main" aria-label="Rodada do jogo">
+  <div class="stack" style="max-width:560px; width:100%;">
+
+    <!-- Progress -->
+    <div style="width:100%; display:flex; align-items:center; gap:12px; max-width:520px;">
+      <span id="round-label" style="font-size:15px; color:var(--muted); white-space:nowrap;">Rodada 1 de 3</span>
+      <div class="progress-wrap" style="flex:1;">
+        <div class="progress-bar" id="progress-bar" style="width:33%;"></div>
+      </div>
+    </div>
+
+    <p style="font-size:16px; color:var(--muted); width:100%; max-width:520px;">
+      Esta frase foi escrita por um <strong>Humano</strong> ou por um <strong>Robô (IA)?</strong>
+    </p>
+
+    <!-- Quote card -->
+    <div class="card" id="quote-card">
+      <div class="quote-row">
+        <p class="quote-text" id="quote-text" role="text"></p>
+        <button class="speak-btn" id="speak-quote" aria-label="Ouvir o texto em voz alta" aria-pressed="false" onclick="speak('quote-text', 'speak-quote')">
+          🔊
+        </button>
+      </div>
+    </div>
+
+    <!-- Choice buttons -->
+    <div class="stack" id="choice-btns">
+      <button class="btn btn-human" id="btn-human" onclick="answer('human')" aria-label="Esta frase foi escrita por um Humano">
+        👤 Escrito por Humano
+      </button>
+      <button class="btn btn-robot" id="btn-robot" onclick="answer('ia')" aria-label="Esta frase foi criada por um Robô de Inteligência Artificial">
+        🤖 Criado por Robô (IA)
+      </button>
+    </div>
+
+    <!-- Feedback card (hidden until answered) -->
+    <div class="feedback-card" id="feedback-card" aria-live="polite">
+      <div class="feedback-header">
+        <span class="icon" id="feedback-icon"></span>
+        <span id="feedback-title"></span>
+        <button class="speak-btn" id="speak-feedback" aria-label="Ouvir explicação em voz alta" aria-pressed="false" onclick="speak('feedback-full', 'speak-feedback')" style="display:none;">
+          🔊
+        </button>
+      </div>
+      <p class="feedback-explain" id="feedback-text"></p>
+      <p id="feedback-full" style="display:none;"></p>
+    </div>
+
+    <!-- Next button (hidden until answered) -->
+    <button class="btn btn-primary" id="btn-next" onclick="nextRound()" style="display:none;" aria-label="Ir para a próxima rodada">
+      Próxima Rodada →
+    </button>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════
+     TELA 3 — Resultado Final
+══════════════════════════════════ -->
+<section id="screen-result" class="screen" role="main" aria-label="Resultado final">
+  <div class="stack" style="max-width:520px; width:100%;">
+
+    <span class="emoji-big" id="result-emoji" aria-hidden="true"></span>
+    <h2 id="result-title" class="mb8"></h2>
+
+    <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:4px;">
+      <span class="score-big" id="score-num"></span>
+      <span style="font-size:clamp(20px,5vw,28px); color:var(--muted);">de 3</span>
+    </div>
+    <p id="score-label" style="font-size:16px; color:var(--muted); margin-bottom:28px;"></p>
+
+    <div class="divider mb24"></div>
+
+    <div class="literacy-card mb24">
+      <h3>📚 Dica de Letramento Digital</h3>
+      <p id="literacy-text"></p>
+      <button class="speak-btn mt8" id="speak-literacy" aria-label="Ouvir dica em voz alta" aria-pressed="false"
+        onclick="speak('literacy-text', 'speak-literacy')" style="width:52px; height:52px; margin-top:12px;">
+        🔊
+      </button>
+    </div>
+
+    <button class="btn btn-primary" onclick="restartGame()" aria-label="Jogar novamente">
+      🔄 Jogar Novamente
+    </button>
+
+  </div>
+</section>
+
+
+<script>
+  /* ══════════════════════════════════
+     DADOS DO JOGO (hardcoded para MVP)
+  ══════════════════════════════════ */
+  const questions = [
+    {
+      text: "\"A prefeitura anunciou hoje a construção de uma nova creche no bairro do Jardim das Flores. A obra vai atender 200 crianças e deve ser entregue em 18 meses.\"",
+      author: "human",
+      explain: "✅ Jornalistas escrevem sobre eventos locais concretos, com detalhes reais como nome de bairro, número de crianças e prazo de entrega.",
+      hint: "Repare nos detalhes específicos: nome do bairro, número exato de crianças e prazo definido. Isso é típico de notícia de verdade escrita por gente de carne e osso."
+    },
+    {
+      text: "\"O presidente apresentou um plano robusto e abrangente de desenvolvimento sustentável e inclusivo para fortalecer o crescimento econômico resiliente da nação visando o progresso social contínuo.\"",
+      author: "ia",
+      explain: "🤖 Robôs costumam empilhar palavras bonitas e genéricas sem dizer nada concreto. Veja: 'robusto', 'abrangente', 'resiliente' — mas sem um detalhe real!",
+      hint: "Muitas palavras difíceis, mas nenhum fato concreto. A IA preenche texto com termos que parecem importantes, mas não explicam nada de verdade."
+    },
+    {
+      text: "\"Minha mãe me ligou às 7 da manhã só pra falar que o prefeito estava na televisão. Aí fui ver e era sobre aquela obra da rua de cima mesmo.\"",
+      author: "human",
+      explain: "✅ Pessoas reais usam linguagem do dia a dia, histórias pessoais e detalhes cotidianos que um robô não inventaria assim.",
+      hint: "Só um ser humano contaria algo assim: a ligação da mãe cedo, a televisão, a referência à 'rua de cima'. A IA não tem experiências pessoais para contar."
+    },
+    {
+      text: "\"A implementação de políticas públicas eficazes requer a sinergia entre stakeholders governamentais, setores privados e a sociedade civil para maximizar o impacto e garantir resultados sustentáveis.\"",
+      author: "ia",
+      explain: "🤖 Palavras como 'sinergia', 'stakeholders' e 'maximizar impacto' são muito comuns em textos de IA. Parece profissional, mas não diz nada de verdade!",
+      hint: "Nenhum ser humano falaria assim numa conversa normal. A IA junta termos de gestão empresarial para parecer séria, mas o texto fica vazio de significado."
+    },
+    {
+      text: "\"Agricultores do interior do Ceará relatam que a chuva deste ano chegou cedo demais. 'A planta não tava pronta', disse Seu Zé, 62 anos, olhando para o campo encharcado.\"",
+      author: "human",
+      explain: "✅ Jornalistas ouvem pessoas reais. A fala de 'Seu Zé', a região específica e o detalhe do campo encharcado mostram que alguém foi lá e entrevistou de verdade.",
+      hint: "A citação direta de uma pessoa com nome, idade e região específica é marca de jornalismo humano. A IA raramente cria personagens tão concretos e naturais."
+    },
+    {
+      text: "\"Em um mundo cada vez mais conectado e globalizado, a educação de qualidade é o principal vetor de transformação social e o caminho mais eficiente para a redução das desigualdades estruturais.\"",
+      author: "ia",
+      explain: "🤖 Frases como essa são genéricas demais — qualquer um concordaria, mas elas não dizem nada de novo. Robôs adoram esse tipo de declaração vazia!",
+      hint: "É uma frase que parece verdadeira mas não conta nada de concreto. A IA produz muitas frases assim: bonitas, sem erros, mas sem conteúdo real."
+    }
+  ];
+
+  /* Embaralha e pega 3 questões únicas */
+  function pickQuestions() {
+    const shuffled = [...questions].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
+  }
+
+  /* ══════════════════════════════════
+     ESTADO DO JOGO
+  ══════════════════════════════════ */
+  let rounds = [];
+  let current = 0;
+  let score = 0;
+  let answered = false;
+
+  /* ══════════════════════════════════
+     SPEECH SYNTHESIS
+  ══════════════════════════════════ */
+  let currentUtterance = null;
+
+  function speak(elementId, btnId) {
+    const el = document.getElementById(elementId);
+    const btn = document.getElementById(btnId);
+    if (!el || !btn) return;
+
+    const text = el.innerText || el.textContent || '';
+    if (!text.trim()) return;
+
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      btn.setAttribute('aria-pressed', 'false');
+      btn.textContent = '🔊';
+      if (currentUtterance && currentUtterance._btnId === btnId) {
+        currentUtterance = null;
+        return;
+      }
+    }
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'pt-BR';
+    utter.rate = 0.88;
+    utter.pitch = 1.05;
+    utter._btnId = btnId;
+    currentUtterance = utter;
+
+    btn.setAttribute('aria-pressed', 'true');
+    btn.textContent = '⏹';
+
+    utter.onend = () => {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.textContent = '🔊';
+      currentUtterance = null;
+    };
+    utter.onerror = () => {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.textContent = '🔊';
+      currentUtterance = null;
+    };
+
+    window.speechSynthesis.speak(utter);
+  }
+
+  function stopSpeech() {
+    if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+    currentUtterance = null;
+  }
+
+  /* ══════════════════════════════════
+     NAVEGAÇÃO ENTRE TELAS
+  ══════════════════════════════════ */
+  function showScreen(id) {
+    stopSpeech();
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  /* ══════════════════════════════════
+     LÓGICA DO JOGO
+  ══════════════════════════════════ */
+  function startGame() {
+    rounds = pickQuestions();
+    current = 0;
+    score = 0;
+    loadRound();
+    showScreen('screen-round');
+  }
+
+  function loadRound() {
+    answered = false;
+    const q = rounds[current];
+    const roundNum = current + 1;
+
+    // Labels
+    document.getElementById('round-label').textContent = `Rodada ${roundNum} de 3`;
+    document.getElementById('progress-bar').style.width = `${Math.round((roundNum / 3) * 100)}%`;
+
+    // Quote
+    document.getElementById('quote-text').textContent = q.text;
+
+    // Reset speak quote button
+    const sqBtn = document.getElementById('speak-quote');
+    sqBtn.setAttribute('aria-pressed', 'false');
+    sqBtn.textContent = '🔊';
+
+    // Reset choice buttons
+    const btnH = document.getElementById('btn-human');
+    const btnR = document.getElementById('btn-robot');
+    btnH.disabled = false;
+    btnR.disabled = false;
+    btnH.style.opacity = '';
+    btnR.style.opacity = '';
+
+    // Hide feedback
+    const fc = document.getElementById('feedback-card');
+    fc.className = 'feedback-card';
+    document.getElementById('feedback-full').textContent = '';
+
+    // Hide next
+    document.getElementById('btn-next').style.display = 'none';
+
+    // Update next button label
+    const btnNext = document.getElementById('btn-next');
+    btnNext.textContent = roundNum < 3 ? 'Próxima Rodada →' : 'Ver Resultado 🏁';
+    btnNext.setAttribute('aria-label', roundNum < 3 ? 'Ir para a próxima rodada' : 'Ver o resultado final');
+  }
+
+  function answer(choice) {
+    if (answered) return;
+    answered = true;
+
+    const q = rounds[current];
+    const correct = choice === q.author;
+    if (correct) score++;
+
+    // Disable buttons
+    const btnH = document.getElementById('btn-human');
+    const btnR = document.getElementById('btn-robot');
+    btnH.disabled = true;
+    btnR.disabled = true;
+
+    // Dim wrong choice visually
+    if (choice === 'human') btnR.style.opacity = '0.35';
+    else btnH.style.opacity = '0.35';
+
+    // Build feedback
+    const fc = document.getElementById('feedback-card');
+    fc.className = 'feedback-card show ' + (correct ? 'correct' : 'wrong');
+
+    document.getElementById('feedback-icon').textContent = correct ? '🎉' : '😅';
+    document.getElementById('feedback-title').textContent = correct ? 'Acertou!' : 'Errou desta vez...';
+    document.getElementById('feedback-text').textContent = q.explain;
+
+    // Full text for TTS (title + explain)
+    const fullText = (correct ? 'Acertou! ' : 'Errou desta vez. ') + q.explain + ' ' + q.hint;
+    document.getElementById('feedback-full').textContent = fullText;
+
+    const sfBtn = document.getElementById('speak-feedback');
+    sfBtn.style.display = 'flex';
+    sfBtn.setAttribute('aria-pressed', 'false');
+    sfBtn.textContent = '🔊';
+
+    // Show next button
+    document.getElementById('btn-next').style.display = 'flex';
+    document.getElementById('btn-next').focus();
+  }
+
+  function nextRound() {
+    stopSpeech();
+    current++;
+    if (current >= 3) {
+      showResult();
+    } else {
+      loadRound();
+    }
+  }
+
+  /* ══════════════════════════════════
+     RESULTADO FINAL
+  ══════════════════════════════════ */
+  const literacyTips = [
+    "Desconfie de textos com muitas palavras difíceis mas sem informações concretas. Notícias de verdade têm nomes, datas e lugares reais.",
+    "A Inteligência Artificial pode escrever textos muito convincentes. Por isso, sempre verifique a fonte antes de compartilhar uma notícia.",
+    "Antes de compartilhar algo nas redes sociais, pergunte: 'Quem disse isso? Quando? Onde?' Se não há respostas, pode ser falso.",
+    "Robôs de IA são muito bons em copiar o estilo de notícias, mas costumam ser vagos. Textos humanos têm detalhes reais e imperfeições."
+  ];
+
+  const messages = [
+    { emoji: '🏆', title: 'Incrível! Você é expert!', label: 'Acertou tudo — você tem um olho apurado para perceber a diferença!' },
+    { emoji: '😊', title: 'Muito bem!', label: 'Quase perfeito! Com mais prática, você pega a diferença sempre.' },
+    { emoji: '🤔', title: 'Continue tentando!', label: 'A IA engana mesmo. Jogar mais vezes vai te ajudar a identificar os padrões.' },
+    { emoji: '💪', title: 'Não desanime!', label: 'Errar faz parte do aprendizado. A IA foi feita para parecer real — você pode melhorar!' }
+  ];
+
+  function showResult() {
+    const idx = score === 3 ? 0 : score === 2 ? 1 : score === 1 ? 2 : 3;
+    const msg = messages[idx];
+
+    document.getElementById('result-emoji').textContent = msg.emoji;
+    document.getElementById('result-title').textContent = msg.title;
+    document.getElementById('score-num').textContent = score;
+    document.getElementById('score-label').textContent = msg.label;
+
+    const tip = literacyTips[Math.floor(Math.random() * literacyTips.length)];
+    document.getElementById('literacy-text').textContent = tip;
+
+    const slBtn = document.getElementById('speak-literacy');
+    slBtn.setAttribute('aria-pressed', 'false');
+    slBtn.textContent = '🔊';
+
+    showScreen('screen-result');
+  }
+
+  function restartGame() {
+    stopSpeech();
+    showScreen('screen-start');
+  }
+</script>
+
+</body>
+</html>
