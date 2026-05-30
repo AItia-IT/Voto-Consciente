@@ -7,9 +7,18 @@
  */
 
 export * from './healthStatus';
+export * from './listPoliticosEsfera';
+export * from './listPoliticosParams';
 export * from './openaiConversation';
 export * from './openaiConversationInput';
 export * from './openaiConversationWithMessages';
 export * from './openaiError';
 export * from './openaiMessage';
 export * from './openaiMessageInput';
+export * from './politico';
+export * from './politicoComDetalhes';
+export * from './politicoComDetalhesEsfera';
+export * from './politicoEsfera';
+export * from './promessaPolitico';
+export * from './realizacaoPolitico';
+export * from './realizacaoPoliticoStatus';

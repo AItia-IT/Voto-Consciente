@@ -94,3 +94,65 @@ export const SendOpenaiMessageBody = zod.object({
 })
 
 
+/**
+ * @summary List politicians with optional filters
+ */
+export const ListPoliticosQueryParams = zod.object({
+  "esfera": zod.enum(['federal', 'estadual', 'municipal']).optional(),
+  "localidade": zod.coerce.string().optional()
+})
+
+export const ListPoliticosResponseItem = zod.object({
+  "id": zod.number(),
+  "nome": zod.string(),
+  "nomeUrna": zod.string(),
+  "partido": zod.string(),
+  "esfera": zod.enum(['federal', 'estadual', 'municipal']),
+  "localidade": zod.string(),
+  "cargo": zod.string(),
+  "foto": zod.string().nullish(),
+  "urlCamara": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const ListPoliticosResponse = zod.array(ListPoliticosResponseItem)
+
+
+/**
+ * @summary Get politician with promises and achievements
+ */
+export const GetPoliticoParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetPoliticoResponse = zod.object({
+  "id": zod.number(),
+  "nome": zod.string(),
+  "nomeUrna": zod.string(),
+  "partido": zod.string(),
+  "esfera": zod.enum(['federal', 'estadual', 'municipal']),
+  "localidade": zod.string(),
+  "cargo": zod.string(),
+  "foto": zod.string().nullish(),
+  "urlCamara": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "promessas": zod.array(zod.object({
+  "id": zod.number(),
+  "politicoId": zod.number(),
+  "categoria": zod.string(),
+  "descricao": zod.string(),
+  "fonte": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+})),
+  "realizacoes": zod.array(zod.object({
+  "id": zod.number(),
+  "politicoId": zod.number(),
+  "titulo": zod.string(),
+  "descricao": zod.string(),
+  "status": zod.enum(['Aprovado', 'Em tramitação', 'Arquivado']),
+  "urlOficial": zod.string().nullish(),
+  "ano": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+

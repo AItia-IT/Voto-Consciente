@@ -21,12 +21,15 @@ import type {
 
 import type {
   HealthStatus,
+  ListPoliticosParams,
   OpenaiConversation,
   OpenaiConversationInput,
   OpenaiConversationWithMessages,
   OpenaiError,
   OpenaiMessage,
-  OpenaiMessageInput
+  OpenaiMessageInput,
+  Politico,
+  PoliticoComDetalhes
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -562,4 +565,165 @@ export const useSendOpenaiMessage = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getSendOpenaiMessageMutationOptions(options));
     }
+
+export const getListPoliticosUrl = (params?: ListPoliticosParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/politicos?${stringifiedParams}` : `/api/politicos`
+}
+
+/**
+ * @summary List politicians with optional filters
+ */
+export const listPoliticos = async (params?: ListPoliticosParams, options?: RequestInit): Promise<Politico[]> => {
+
+  return customFetch<Politico[]>(getListPoliticosUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListPoliticosQueryKey = (params?: ListPoliticosParams,) => {
+    return [
+    `/api/politicos`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListPoliticosQueryOptions = <TData = Awaited<ReturnType<typeof listPoliticos>>, TError = ErrorType<unknown>>(params?: ListPoliticosParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPoliticos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListPoliticosQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPoliticos>>> = ({ signal }) => listPoliticos(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPoliticos>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListPoliticosQueryResult = NonNullable<Awaited<ReturnType<typeof listPoliticos>>>
+export type ListPoliticosQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List politicians with optional filters
+ */
+
+export function useListPoliticos<TData = Awaited<ReturnType<typeof listPoliticos>>, TError = ErrorType<unknown>>(
+ params?: ListPoliticosParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPoliticos>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListPoliticosQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetPoliticoUrl = (id: number,) => {
+
+
+
+
+  return `/api/politicos/${id}`
+}
+
+/**
+ * @summary Get politician with promises and achievements
+ */
+export const getPolitico = async (id: number, options?: RequestInit): Promise<PoliticoComDetalhes> => {
+
+  return customFetch<PoliticoComDetalhes>(getGetPoliticoUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPoliticoQueryKey = (id: number,) => {
+    return [
+    `/api/politicos/${id}`
+    ] as const;
+    }
+
+
+export const getGetPoliticoQueryOptions = <TData = Awaited<ReturnType<typeof getPolitico>>, TError = ErrorType<OpenaiError>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPolitico>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPoliticoQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPolitico>>> = ({ signal }) => getPolitico(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPolitico>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPoliticoQueryResult = NonNullable<Awaited<ReturnType<typeof getPolitico>>>
+export type GetPoliticoQueryError = ErrorType<OpenaiError>
+
+
+/**
+ * @summary Get politician with promises and achievements
+ */
+
+export function useGetPolitico<TData = Awaited<ReturnType<typeof getPolitico>>, TError = ErrorType<OpenaiError>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPolitico>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPoliticoQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 

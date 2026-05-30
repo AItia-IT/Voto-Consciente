@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: openai
     description: OpenAI AI chat, image, and audio operations
+  - name: politicos
+    description: Políticos, promessas e realizações
 paths:
   /healthz:
     get:
@@ -141,6 +143,56 @@ paths:
           description: SSE stream of assistant text chunks
           content:
             text/event-stream: {}
+  /politicos:
+    get:
+      operationId: listPoliticos
+      tags: [politicos]
+      summary: List politicians with optional filters
+      parameters:
+        - name: esfera
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [federal, estadual, municipal]
+        - name: localidade
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of politicians
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Politico"
+  /politicos/{id}:
+    get:
+      operationId: getPolitico
+      tags: [politicos]
+      summary: Get politician with promises and achievements
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Politician with full details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PoliticoComDetalhes"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
 components:
   schemas:
     HealthStatus:
@@ -224,3 +276,138 @@ components:
           type: string
       required:
         - error
+    Politico:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        nomeUrna:
+          type: string
+        partido:
+          type: string
+        esfera:
+          type: string
+          enum: [federal, estadual, municipal]
+        localidade:
+          type: string
+        cargo:
+          type: string
+        foto:
+          type: string
+          nullable: true
+        urlCamara:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - nome
+        - nomeUrna
+        - partido
+        - esfera
+        - localidade
+        - cargo
+        - createdAt
+    PromessaPolitico:
+      type: object
+      properties:
+        id:
+          type: integer
+        politicoId:
+          type: integer
+        categoria:
+          type: string
+        descricao:
+          type: string
+        fonte:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - politicoId
+        - categoria
+        - descricao
+        - createdAt
+    RealizacaoPolitico:
+      type: object
+      properties:
+        id:
+          type: integer
+        politicoId:
+          type: integer
+        titulo:
+          type: string
+        descricao:
+          type: string
+        status:
+          type: string
+          enum: [Aprovado, "Em tramitação", Arquivado]
+        urlOficial:
+          type: string
+          nullable: true
+        ano:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - politicoId
+        - titulo
+        - descricao
+        - status
+        - createdAt
+    PoliticoComDetalhes:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        nomeUrna:
+          type: string
+        partido:
+          type: string
+        esfera:
+          type: string
+          enum: [federal, estadual, municipal]
+        localidade:
+          type: string
+        cargo:
+          type: string
+        foto:
+          type: string
+          nullable: true
+        urlCamara:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        promessas:
+          type: array
+          items:
+            $ref: "#/components/schemas/PromessaPolitico"
+        realizacoes:
+          type: array
+          items:
+            $ref: "#/components/schemas/RealizacaoPolitico"
+      required:
+        - id
+        - nome
+        - nomeUrna
+        - partido
+        - esfera
+        - localidade
+        - cargo
+        - createdAt
+        - promessas
+        - realizacoes

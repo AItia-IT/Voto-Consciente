@@ -11,6 +11,7 @@ import Academia from "@/pages/academia";
 import Match from "@/pages/match";
 import Dashboard from "@/pages/dashboard";
 import Chat from "@/pages/chat";
+import Politico from "@/pages/politico";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ function Router() {
         <Route path="/match" component={Match} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/chat" component={Chat} />
+        <Route path="/politico/:id" component={Politico} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

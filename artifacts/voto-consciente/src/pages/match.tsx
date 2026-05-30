@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle, ChevronDown, ChevronUp, CheckCircle2, XCircle } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, CheckCircle2, XCircle, Loader2, ExternalLink } from "lucide-react";
+import { useListPoliticos } from "@workspace/api-client-react";
+import type { Politico } from "@workspace/api-client-react";
 
 type Theme = {
   id: string;
@@ -48,13 +51,12 @@ const THEMES: Theme[] = [
   ]}
 ];
 
-type Candidate = { name: string; party: string; photo: string; proposals: Record<string, 'A'|'B'|'C'> };
-const CANDIDATES: Candidate[] = [
-  { name: "Dra. Ana Ferreira", party: "Partido Exemplo A", photo: "👩‍⚕️", proposals: { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'C', ambiente:'B', inclusao:'A' } },
-  { name: "Sr. Carlos Menezes", party: "Partido Exemplo B", photo: "👨‍💼", proposals: { saude:'B', educacao:'B', seguranca:'A', transporte:'C', economia:'A', ambiente:'C', inclusao:'B' } },
-  { name: "Prof. Maria Santos", party: "Partido Exemplo C", photo: "👩‍🏫", proposals: { saude:'C', educacao:'C', seguranca:'B', transporte:'B', economia:'B', ambiente:'A', inclusao:'C' } },
-  { name: "Eng. Roberto Lima", party: "Partido Exemplo D", photo: "👨‍🔧", proposals: { saude:'A', educacao:'C', seguranca:'A', transporte:'B', economia:'A', ambiente:'B', inclusao:'C' } },
-];
+const CANDIDATE_PROPOSALS: Record<string, Record<string, 'A'|'B'|'C'>> = {
+  "TABATA AMARAL":  { saude:'A', educacao:'A', seguranca:'C', transporte:'B', economia:'C', ambiente:'B', inclusao:'A' },
+  "GUILHERME BOULOS": { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'A' },
+  "KIM KATAGUIRI":  { saude:'C', educacao:'C', seguranca:'A', transporte:'C', economia:'A', ambiente:'C', inclusao:'B' },
+  "SÂMIA BOMFIM":   { saude:'A', educacao:'A', seguranca:'C', transporte:'B', economia:'B', ambiente:'A', inclusao:'A' },
+};
 
 function Disclaimer() {
   return (
@@ -67,17 +69,19 @@ function Disclaimer() {
   );
 }
 
-function CandidateProposalDetail({ candidate, answers }: { candidate: Candidate & { match: number }; answers: Record<string, 'A'|'B'|'C'> }) {
+type CandidateWithMatch = Politico & { match: number; proposals: Record<string, 'A'|'B'|'C'> };
+
+function CandidateProposalDetail({ candidate, answers }: { candidate: CandidateWithMatch; answers: Record<string, 'A'|'B'|'C'> }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
     <Card className="overflow-hidden border border-border shadow-sm bg-white">
       <CardContent className="p-0">
         <div className="flex items-center p-4 gap-4 bg-muted/30">
-          <div className="text-5xl bg-white p-2 rounded-xl shadow-sm border border-border">{candidate.photo}</div>
+          <div className="text-5xl bg-white p-2 rounded-xl shadow-sm border border-border">{candidate.foto ?? "👤"}</div>
           <div className="flex-1">
-            <h3 className="text-2xl font-bold text-foreground">{candidate.name}</h3>
-            <p className="text-lg text-muted-foreground">{candidate.party}</p>
+            <h3 className="text-2xl font-bold text-foreground">{candidate.nome}</h3>
+            <p className="text-lg text-muted-foreground">{candidate.partido} · {candidate.cargo}</p>
           </div>
           <div className="text-right">
             <span className="text-3xl font-extrabold text-primary">{candidate.match}%</span>
@@ -90,14 +94,21 @@ function CandidateProposalDetail({ candidate, answers }: { candidate: Candidate 
             style={{ width: `${candidate.match}%` }}
           />
         </div>
-        <button
-          className="w-full flex items-center justify-center gap-2 py-3 text-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors bg-white"
-          onClick={() => setExpanded(e => !e)}
-          data-testid={`button-expand-candidate-${candidate.name.replace(/\s+/g, '-')}`}
-        >
-          {expanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-          {expanded ? "Ocultar propostas" : "Ver propostas por tema"}
-        </button>
+        <div className="flex border-t divide-x bg-white">
+          <button
+            className="flex-1 flex items-center justify-center gap-2 py-3 text-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            onClick={() => setExpanded(e => !e)}
+            data-testid={`button-expand-candidate-${candidate.nome.replace(/\s+/g, '-')}`}
+          >
+            {expanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            {expanded ? "Ocultar propostas" : "Ver propostas por tema"}
+          </button>
+          <Link href={`/politico/${candidate.id}`}>
+            <button className="flex items-center justify-center gap-2 px-4 py-3 text-base font-semibold text-primary hover:bg-primary/5 transition-colors">
+              Perfil completo <ExternalLink className="h-4 w-4" />
+            </button>
+          </Link>
+        </div>
         {expanded && (
           <div className="border-t divide-y bg-white">
             {THEMES.map(theme => {
@@ -115,8 +126,8 @@ function CandidateProposalDetail({ candidate, answers }: { candidate: Candidate 
                     <span className="font-bold text-lg uppercase tracking-wide text-foreground">{theme.title}</span>
                   </div>
                   <div className="space-y-1 pl-7 text-foreground">
-                    <p className="text-base"><span className="font-semibold">Você:</span> {userOption?.text}</p>
-                    <p className="text-base"><span className="font-semibold">{candidate.name.split(' ')[0]}:</span> {candidateOption?.text}</p>
+                    <p className="text-base"><span className="font-semibold">Você:</span> {userOption?.text ?? "—"}</p>
+                    <p className="text-base"><span className="font-semibold">{candidate.nome.split(' ')[0]}:</span> {candidateOption?.text ?? "—"}</p>
                   </div>
                 </div>
               );
@@ -134,6 +145,14 @@ export default function Match() {
   const [answers, setAnswers] = useState<Record<string, 'A'|'B'|'C'>>({});
   const [showResults, setShowResults] = useState(false);
 
+  const { data: politicos, isLoading } = useListPoliticos();
+
+  const candidates: CandidateWithMatch[] = (politicos ?? []).map(p => ({
+    ...p,
+    match: 0,
+    proposals: CANDIDATE_PROPOSALS[p.nomeUrna] ?? {},
+  }));
+
   const handleStart = () => setStarted(true);
 
   const handleAnswer = (optionId: 'A'|'B'|'C') => {
@@ -147,10 +166,12 @@ export default function Match() {
     }
   };
 
-  const getMatchPercentage = (candidate: Candidate) => {
+  const getMatchPercentage = (candidate: CandidateWithMatch) => {
+    const proposals = candidate.proposals;
+    if (Object.keys(proposals).length === 0) return 0;
     let matches = 0;
     THEMES.forEach(theme => {
-      if (candidate.proposals[theme.id] === answers[theme.id]) {
+      if (proposals[theme.id] === answers[theme.id]) {
         matches++;
       }
     });
@@ -163,12 +184,22 @@ export default function Match() {
         <div className="text-center mb-8">
           <div className="text-6xl bg-primary/10 p-6 rounded-full inline-block mb-4">🤝</div>
           <h1 className="text-4xl font-extrabold text-foreground mb-2">Match de Candidatos</h1>
-          <p className="text-xl text-muted-foreground">Descubra quais candidatos fictícios mais combinam com suas ideias.</p>
+          <p className="text-xl text-muted-foreground">Descubra quais candidatos mais combinam com suas ideias.</p>
         </div>
         
         <Disclaimer />
         
-        <Button onClick={handleStart} className="w-full text-2xl h-16 shadow-md" data-testid="button-start-match">
+        {isLoading ? (
+          <div className="flex items-center gap-3 text-muted-foreground text-lg mb-4">
+            <Loader2 className="h-6 w-6 animate-spin" /> Carregando candidatos...
+          </div>
+        ) : candidates.length === 0 ? (
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-4 text-yellow-800 text-base">
+            Nenhum candidato encontrado. Execute o seed via <code className="font-mono text-sm">/api/admin/sync</code> para popular os dados.
+          </div>
+        ) : null}
+
+        <Button onClick={handleStart} className="w-full text-2xl h-16 shadow-md" data-testid="button-start-match" disabled={isLoading}>
           Começar Teste
         </Button>
       </div>
@@ -176,7 +207,8 @@ export default function Match() {
   }
 
   if (showResults) {
-    const results = CANDIDATES.map(c => ({ ...c, match: getMatchPercentage(c) }))
+    const results = candidates
+      .map(c => ({ ...c, match: getMatchPercentage(c) }))
       .sort((a, b) => b.match - a.match);
 
     return (
@@ -192,7 +224,7 @@ export default function Match() {
 
         <div className="space-y-4">
           {results.map((c) => (
-            <CandidateProposalDetail key={c.name} candidate={c} answers={answers} />
+            <CandidateProposalDetail key={c.id} candidate={c} answers={answers} />
           ))}
         </div>
         

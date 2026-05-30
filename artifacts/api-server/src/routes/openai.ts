@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { eq } from "drizzle-orm";
-import { db, conversations, messages } from "@workspace/db";
+import { eq, ilike, or } from "drizzle-orm";
+import { db, conversations, messages, politicos, promessas, realizacoes } from "@workspace/db";
 import { openai } from "@workspace/integrations-openai-ai-server";
 
 const router = Router();
 
-const SYSTEM_PROMPT = `Você é a Sônia, uma assistente educativa virtual da plataforma "Voto Consciente". 
+const BASE_SYSTEM_PROMPT = `Você é a Sônia, uma assistente educativa virtual da plataforma "Voto Consciente". 
 Seu papel é ajudar cidadãos brasileiros — principalmente pessoas idosas — a entender melhor:
 - Como identificar notícias falsas e desinformação
 - Como funciona a democracia, os poderes e os cargos eleitorais
@@ -15,11 +15,57 @@ Seu papel é ajudar cidadãos brasileiros — principalmente pessoas idosas — 
 REGRAS FUNDAMENTAIS (nunca viole):
 - Nunca apoie, critique ou recomende partidos políticos, candidatos ou ideologias
 - Nunca faça recomendações de voto
-- Nunca opine sobre figuras políticas específicas
+- Ao analisar promessas e realizações de políticos, seja sempre factual e apartidária
 - Se alguém perguntar em qual candidato votar, diga que a escolha é pessoal e incentive a pessoa a comparar propostas
 
 Use linguagem muito simples, acolhedora e sem jargões. Seja paciente e encorajador. Use exemplos do cotidiano.
 Mantenha respostas curtas e diretas — máximo 3 parágrafos.`;
+
+async function buildSystemPrompt(userMessage: string): Promise<string> {
+  try {
+    const allPoliticos = await db.select().from(politicos);
+    if (allPoliticos.length === 0) return BASE_SYSTEM_PROMPT;
+
+    const mentioned = allPoliticos.filter(p => {
+      const msg = userMessage.toLowerCase();
+      return (
+        msg.includes(p.nomeUrna.toLowerCase()) ||
+        msg.includes(p.nome.toLowerCase()) ||
+        p.nomeUrna.split(" ").some(word => word.length > 4 && msg.includes(word.toLowerCase()))
+      );
+    });
+
+    if (mentioned.length === 0) return BASE_SYSTEM_PROMPT;
+
+    const contextos = await Promise.all(
+      mentioned.map(async (p) => {
+        const [prom, real] = await Promise.all([
+          db.select().from(promessas).where(eq(promessas.politicoId, p.id)),
+          db.select().from(realizacoes).where(eq(realizacoes.politicoId, p.id)),
+        ]);
+
+        const promStr = prom.map(pr => `  - [${pr.categoria}] ${pr.descricao}`).join("\n");
+        const realStr = real.map(r => `  - [${r.status}] ${r.titulo}: ${r.descricao}`).join("\n");
+
+        return `## ${p.nome} (${p.partido} — ${p.cargo} por ${p.localidade})
+Promessas de campanha:
+${promStr || "  (nenhuma registrada)"}
+Projetos de lei / Realizações:
+${realStr || "  (nenhuma registrada)"}`;
+      })
+    );
+
+    return `${BASE_SYSTEM_PROMPT}
+
+---
+CONTEXTO FACTUAL DOS POLÍTICOS MENCIONADOS (use para análise apartidária e factual):
+${contextos.join("\n\n")}
+
+Ao responder, compare objetivamente as promessas com as realizações. Não julgue o político como bom ou mau — apenas aponte o que foi prometido e o que foi feito, baseando-se nos dados acima.`;
+  } catch {
+    return BASE_SYSTEM_PROMPT;
+  }
+}
 
 router.get("/conversations", async (req, res) => {
   try {
@@ -109,8 +155,10 @@ router.post("/conversations/:id/messages", async (req, res) => {
 
     const history = await db.select().from(messages).where(eq(messages.conversationId, id)).orderBy(messages.createdAt);
 
+    const systemPrompt = await buildSystemPrompt(content);
+
     const chatMessages = [
-      { role: "system" as const, content: SYSTEM_PROMPT },
+      { role: "system" as const, content: systemPrompt },
       ...history.map((m) => ({
         role: m.role as "user" | "assistant",
         content: m.content,
@@ -124,7 +172,7 @@ router.post("/conversations/:id/messages", async (req, res) => {
     let fullResponse = "";
 
     const stream = await openai.chat.completions.create({
-      model: "gpt-5.4",
+      model: "gpt-4.1-mini",
       max_completion_tokens: 512,
       messages: chatMessages,
       stream: true,

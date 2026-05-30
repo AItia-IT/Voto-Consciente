@@ -42,3 +42,92 @@ export interface OpenaiError {
   error: string;
 }
 
+export type PoliticoEsfera = typeof PoliticoEsfera[keyof typeof PoliticoEsfera];
+
+
+export const PoliticoEsfera = {
+  federal: 'federal',
+  estadual: 'estadual',
+  municipal: 'municipal',
+} as const;
+
+export interface Politico {
+  id: number;
+  nome: string;
+  nomeUrna: string;
+  partido: string;
+  esfera: PoliticoEsfera;
+  localidade: string;
+  cargo: string;
+  foto?: string | null;
+  urlCamara?: string | null;
+  createdAt: string;
+}
+
+export interface PromessaPolitico {
+  id: number;
+  politicoId: number;
+  categoria: string;
+  descricao: string;
+  fonte?: string | null;
+  createdAt: string;
+}
+
+export type RealizacaoPoliticoStatus = typeof RealizacaoPoliticoStatus[keyof typeof RealizacaoPoliticoStatus];
+
+
+export const RealizacaoPoliticoStatus = {
+  Aprovado: 'Aprovado',
+  Em_tramitação: 'Em tramitação',
+  Arquivado: 'Arquivado',
+} as const;
+
+export interface RealizacaoPolitico {
+  id: number;
+  politicoId: number;
+  titulo: string;
+  descricao: string;
+  status: RealizacaoPoliticoStatus;
+  urlOficial?: string | null;
+  ano?: string | null;
+  createdAt: string;
+}
+
+export type PoliticoComDetalhesEsfera = typeof PoliticoComDetalhesEsfera[keyof typeof PoliticoComDetalhesEsfera];
+
+
+export const PoliticoComDetalhesEsfera = {
+  federal: 'federal',
+  estadual: 'estadual',
+  municipal: 'municipal',
+} as const;
+
+export interface PoliticoComDetalhes {
+  id: number;
+  nome: string;
+  nomeUrna: string;
+  partido: string;
+  esfera: PoliticoComDetalhesEsfera;
+  localidade: string;
+  cargo: string;
+  foto?: string | null;
+  urlCamara?: string | null;
+  createdAt: string;
+  promessas: PromessaPolitico[];
+  realizacoes: RealizacaoPolitico[];
+}
+
+export type ListPoliticosParams = {
+esfera?: ListPoliticosEsfera;
+localidade?: string;
+};
+
+export type ListPoliticosEsfera = typeof ListPoliticosEsfera[keyof typeof ListPoliticosEsfera];
+
+
+export const ListPoliticosEsfera = {
+  federal: 'federal',
+  estadual: 'estadual',
+  municipal: 'municipal',
+} as const;
+
