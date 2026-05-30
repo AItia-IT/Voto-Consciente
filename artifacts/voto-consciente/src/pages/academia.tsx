@@ -7,6 +7,22 @@ import { RefreshCw, ChevronRight, Star, Volume2 } from "lucide-react";
 import { useTTS } from "@/hooks/use-tts";
 import mascoteImg from "@/assets/mascote.png";
 
+// ── Paleta Facebook ──────────────────────────────────────────────────────────
+const FB = {
+  blue:       "#1877F2",
+  blueLight:  "#E7F3FF",
+  blueDark:   "#166FE5",
+  green:      "#42B72A",
+  greenLight: "#E6F4EA",
+  bg:         "#F0F2F5",
+  white:      "#FFFFFF",
+  border:     "#E4E6EB",
+  textPrimary:"#050505",
+  textMuted:  "#65676B",
+  shadow:     "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)",
+  shadowMd:   "0 4px 12px rgba(0,0,0,0.15)",
+};
+
 // ── Banco de termos cívicos (24 termos + FREE central) ──────────────────────
 const TERMS: { term: string; definition: string }[] = [
   { term: "Poder Executivo",     definition: "Governa o país. Inclui o Presidente, governadores e prefeitos." },
@@ -45,25 +61,24 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// Índices das 5 linhas, 5 colunas e 2 diagonais de uma grade 5×5
 const BINGO_LINES: number[][] = [
-  [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24], // linhas
-  [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], // colunas
-  [0,6,12,18,24], [4,8,12,16,20],                                                   // diagonais
+  [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+  [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+  [0,6,12,18,24],[4,8,12,16,20],
 ];
 
 function buildGrid(): Array<{ term: string; definition: string } | null> {
   const picked = shuffle(TERMS).slice(0, 24);
   const grid: Array<{ term: string; definition: string } | null> = [...picked];
-  grid.splice(12, 0, null); // FREE no centro (índice 12)
+  grid.splice(12, 0, null);
   return grid;
 }
 
-// ── Confetti simples ─────────────────────────────────────────────────────────
+// ── Confetti ─────────────────────────────────────────────────────────────────
 function Confetti() {
-  const pieces = Array.from({ length: 28 }, (_, i) => ({
+  const pieces = Array.from({ length: 30 }, (_, i) => ({
     id: i,
-    color: ["#F59E0B","#1a2744","#22C55E","#EF4444","#3B82F6","#A855F7"][i % 6],
+    color: [FB.blue, FB.green, "#F7B928", "#E74C3C", "#9B59B6", FB.blueDark][i % 6],
     left: `${Math.random() * 100}%`,
     delay: Math.random() * 0.5,
     duration: 1.2 + Math.random() * 0.8,
@@ -84,13 +99,13 @@ function Confetti() {
   );
 }
 
-// ── Componente principal ─────────────────────────────────────────────────────
+// ── Componente principal ──────────────────────────────────────────────────────
 export default function Academia() {
   const { speak: speakTerm } = useTTS();
   const [grid, setGrid] = useState<Array<{ term: string; definition: string } | null>>(() => buildGrid());
-  const [callOrder, setCallOrder] = useState<number[]>(() => shuffle([...Array(24).keys()])); // índices 0-23 do TERMS original
+  const [callOrder, setCallOrder] = useState<number[]>(() => shuffle([...Array(24).keys()]));
   const [callIdx, setCallIdx] = useState(0);
-  const [marked, setMarked] = useState<Set<number>>(() => new Set([12])); // FREE marcado
+  const [marked, setMarked] = useState<Set<number>>(() => new Set([12]));
   const [celebratedLines, setCelebratedLines] = useState<Set<string>>(new Set());
   const [showBingo, setShowBingo] = useState(false);
   const [bingoXP, setBingoXP] = useState(0);
@@ -98,18 +113,11 @@ export default function Academia() {
   const [confetti, setConfetti] = useState(false);
   const [gameOver, setGameOver] = useState(false);
 
-  // Definição que a Sônia está "cantando" agora
-  // callOrder[callIdx] é o índice no TERMS array; mas o grid tem a célula FREE no meio
-  // Precisamos pegar o termo do TERMS pelo callOrder
-  const currentTermIdx = callOrder[callIdx] as number; // índice em TERMS (0-23)
-  const currentEntry = TERMS[currentTermIdx];
+  const currentEntry = TERMS[callOrder[callIdx] as number];
 
-  // Mapeia termo → posição na grade (0-24), ignorando FREE (índice 12 = null)
   const termToGridPos = useCallback(() => {
     const map = new Map<string, number>();
-    grid.forEach((cell, pos) => {
-      if (cell) map.set(cell.term, pos);
-    });
+    grid.forEach((cell, pos) => { if (cell) map.set(cell.term, pos); });
     return map;
   }, [grid]);
 
@@ -117,17 +125,13 @@ export default function Academia() {
     const newLines: number[][] = [];
     for (const line of BINGO_LINES) {
       const key = line.join(",");
-      if (!celebratedLines.has(key) && line.every(i => markedSet.has(i))) {
-        newLines.push(line);
-      }
+      if (!celebratedLines.has(key) && line.every(i => markedSet.has(i))) newLines.push(line);
     }
     return newLines;
   };
 
   const handleCellClick = (gridPos: number) => {
     if (marked.has(gridPos) || grid[gridPos] === null) return;
-
-    // Só marca se o termo foi chamado
     const cell = grid[gridPos];
     if (!cell) return;
     const calledTerms = new Set(callOrder.slice(0, callIdx + 1).map(i => TERMS[i as number].term));
@@ -150,21 +154,14 @@ export default function Academia() {
       setTimeout(() => setConfetti(false), 2200);
     }
 
-    // Cartela completa
     if (newMarked.size === 25) {
-      completeMission(99); // ID especial do bingo
+      completeMission(99);
       addXP(300);
-      setTimeout(() => {
-        setGameOver(true);
-        setShowCertificate(true);
-        setConfetti(true);
-      }, 700);
+      setTimeout(() => { setGameOver(true); setShowCertificate(true); setConfetti(true); }, 700);
     }
   };
 
-  const nextCall = () => {
-    if (callIdx + 1 < 24) setCallIdx(c => c + 1);
-  };
+  const nextCall = () => { if (callIdx + 1 < 24) setCallIdx(c => c + 1); };
 
   const newGame = () => {
     setGrid(buildGrid());
@@ -178,47 +175,57 @@ export default function Academia() {
     setConfetti(false);
   };
 
-  // Células destacadas (pertencendo a uma linha de bingo celebrada)
   const highlightedCells = new Set<number>();
   for (const line of BINGO_LINES) {
     const key = line.join(",");
     if (celebratedLines.has(key)) line.forEach(i => highlightedCells.add(i));
   }
 
-  // Termos chamados até agora
   const calledTerms = new Set(callOrder.slice(0, callIdx + 1).map(i => TERMS[i as number].term));
   const termToPos = termToGridPos();
 
-  // ── Tela de certificado ────────────────────────────────────────────────────
+  // ── Certificado ────────────────────────────────────────────────────────────
   if (showCertificate) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-6 px-4">
+      <div
+        className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-5 px-4 -mx-4 -my-4 py-10"
+        style={{ background: FB.bg }}
+      >
         {confetti && <Confetti />}
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", bounce: 0.4 }}
-          className="border-4 border-yellow-400 p-8 rounded-3xl shadow-2xl w-full max-w-md"
-          style={{ background: "linear-gradient(135deg,#FFFBEB,#FEF3C7)" }}
+          className="w-full max-w-md rounded-2xl p-8"
+          style={{ background: FB.white, boxShadow: FB.shadowMd, border: `3px solid ${FB.blue}` }}
         >
           <div className="text-7xl mb-4">🎓</div>
-          <h1 className="text-3xl font-extrabold text-yellow-800 mb-1">BINGO COMPLETO!</h1>
-          <h2 className="text-2xl font-bold text-yellow-900 mb-4">Cidadão Democrata</h2>
-          <p className="text-lg text-yellow-700 font-medium leading-relaxed">
-            Você marcou toda a cartela e ganhou <strong>+300 XP</strong>!<br />
+          <h1 className="text-3xl font-extrabold mb-1" style={{ color: FB.blue }}>BINGO COMPLETO!</h1>
+          <h2 className="text-xl font-bold mb-4" style={{ color: FB.textPrimary }}>Cidadão Democrata</h2>
+          <p className="text-lg font-medium leading-relaxed" style={{ color: FB.textMuted }}>
+            Você marcou toda a cartela e ganhou <strong style={{ color: FB.blue }}>+300 XP</strong>!<br />
             Sua democracia agradece. 🗳️
           </p>
         </motion.div>
-        <Button onClick={newGame} className="w-full max-w-md h-14 text-xl font-bold rounded-full shadow-md" style={{ background: "#1a2744" }}>
-          <RefreshCw className="h-5 w-5 mr-2" /> Jogar Novamente
-        </Button>
+        <button
+          onClick={newGame}
+          className="flex items-center gap-2 font-bold text-lg h-12 px-8 rounded-lg transition-colors"
+          style={{ background: FB.blue, color: FB.white }}
+          onMouseOver={e => (e.currentTarget.style.background = FB.blueDark)}
+          onMouseOut={e => (e.currentTarget.style.background = FB.blue)}
+        >
+          <RefreshCw className="h-5 w-5" /> Jogar Novamente
+        </button>
       </div>
     );
   }
 
   // ── Jogo ───────────────────────────────────────────────────────────────────
   return (
-    <div className="pb-8">
+    <div
+      className="-mx-4 -my-4 min-h-full pb-6"
+      style={{ background: FB.bg }}
+    >
       {confetti && <Confetti />}
 
       {/* Modal BINGO */}
@@ -229,206 +236,251 @@ export default function Academia() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setShowBingo(false)}
           >
-            <div className="absolute inset-0 bg-black/40" />
+            <div className="absolute inset-0 bg-black/50" />
             <motion.div
-              className="relative z-10 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full"
-              style={{ background: "#FEF3C7", border: "4px solid #F59E0B" }}
-              initial={{ scale: 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", bounce: 0.5 }}
+              className="relative z-10 rounded-2xl p-8 text-center max-w-sm w-full"
+              style={{ background: FB.white, boxShadow: FB.shadowMd }}
+              initial={{ scale: 0.6, y: 40 }} animate={{ scale: 1, y: 0 }}
+              transition={{ type: "spring", bounce: 0.45 }}
               onClick={e => e.stopPropagation()}
             >
               <div className="text-6xl mb-3">🎉</div>
-              <h2 className="text-4xl font-black mb-2" style={{ color: "#1a2744" }}>BINGO!</h2>
-              <p className="text-xl font-semibold mb-4" style={{ color: "#92400E" }}>
-                Você ganhou <strong>+{bingoXP} XP</strong>!
+              <h2 className="text-4xl font-black mb-2" style={{ color: FB.blue }}>BINGO!</h2>
+              <p className="text-xl font-semibold mb-5" style={{ color: FB.textMuted }}>
+                Você ganhou <strong style={{ color: FB.green }}>+{bingoXP} XP</strong>!
               </p>
-              <Button onClick={() => setShowBingo(false)} className="w-full h-12 text-lg font-bold rounded-full" style={{ background: "#1a2744" }}>
+              <button
+                onClick={() => setShowBingo(false)}
+                className="w-full h-11 rounded-lg font-bold text-lg transition-colors"
+                style={{ background: FB.blue, color: FB.white }}
+                onMouseOver={e => (e.currentTarget.style.background = FB.blueDark)}
+                onMouseOut={e => (e.currentTarget.style.background = FB.blue)}
+              >
                 Continuar jogando
-              </Button>
+              </button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-extrabold" style={{ color: "#1a2744" }}>🎱 Bingo Cívico</h1>
-          <p className="text-sm mt-0.5" style={{ color: "#6B7280" }}>Academia da Democracia</p>
-        </div>
-        <Button variant="outline" onClick={newGame} className="rounded-full gap-2 font-semibold border-2" style={{ borderColor: "#1a2744", color: "#1a2744" }}>
-          <RefreshCw className="h-4 w-4" /> Nova Cartela
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
-        {/* ── Cartela 5×5 ── */}
-        <div>
-          {/* Header BINGO */}
-          <div className="grid grid-cols-5 gap-1 mb-1">
-            {["B","I","N","G","O"].map(l => (
-              <div key={l} className="h-9 flex items-center justify-center font-black text-xl rounded-lg" style={{ background: "#1a2744", color: "#F59E0B" }}>
-                {l}
-              </div>
-            ))}
+      <div className="max-w-5xl mx-auto px-4 pt-5">
+        {/* ── Header (estilo post do Facebook) ── */}
+        <div
+          className="rounded-xl mb-4 px-4 py-3 flex items-center justify-between"
+          style={{ background: FB.white, boxShadow: FB.shadow }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center font-black text-lg"
+              style={{ background: FB.blue, color: FB.white }}
+            >
+              🎱
+            </div>
+            <div>
+              <div className="font-bold text-lg leading-tight" style={{ color: FB.textPrimary }}>Bingo Cívico</div>
+              <div className="text-sm" style={{ color: FB.textMuted }}>Academia da Democracia</div>
+            </div>
           </div>
-
-          {/* Células */}
-          <div className="grid grid-cols-5 gap-1.5">
-            {grid.map((cell, pos) => {
-              const isFree = cell === null;
-              const isMarked = marked.has(pos);
-              const isHighlighted = highlightedCells.has(pos);
-              const isCallable = cell && calledTerms.has(cell.term);
-              const isClickable = cell && isCallable && !isMarked;
-
-              return (
-                <motion.div
-                  key={pos}
-                  onClick={() => handleCellClick(pos)}
-                  whileHover={isClickable ? { scale: 1.03 } : {}}
-                  whileTap={isClickable ? { scale: 0.97 } : {}}
-                  className="relative flex flex-col items-center justify-center rounded-xl text-center font-bold transition-all select-none"
-                  style={{
-                    minHeight: "100px",
-                    padding: "10px 6px 28px",
-                    cursor: isClickable ? "pointer" : "default",
-                    background: isFree
-                      ? "#1a2744"
-                      : isHighlighted
-                      ? "#FDE68A"
-                      : isMarked
-                      ? "#F59E0B"
-                      : isCallable
-                      ? "#FEF9EC"
-                      : "#F3F4F6",
-                    border: isHighlighted
-                      ? "2.5px solid #F59E0B"
-                      : isMarked
-                      ? "2.5px solid #D97706"
-                      : isCallable
-                      ? "2.5px solid #F59E0B"
-                      : "2.5px solid #E5E7EB",
-                    color: isFree
-                      ? "#F59E0B"
-                      : isMarked || isHighlighted
-                      ? "#1a2744"
-                      : isCallable
-                      ? "#1a2744"
-                      : "#9CA3AF",
-                  }}
-                >
-                  {isFree ? (
-                    <img src={mascoteImg} alt="FREE" className="h-12 w-12 rounded-full object-cover" />
-                  ) : (
-                    <>
-                      {isMarked && (
-                        <span className="absolute top-1.5 left-1.5 text-lg leading-none">✓</span>
-                      )}
-                      <span
-                        className="leading-snug font-bold"
-                        style={{ fontSize: "clamp(20px, 1.6vw, 22px)", hyphens: "auto" }}
-                      >
-                        {cell!.term}
-                      </span>
-                      {/* TTS por célula — acessível para todos os termos */}
-                      <button
-                        type="button"
-                        aria-label={`Ouvir: ${cell!.term}`}
-                        onClick={(e) => { e.stopPropagation(); speakTerm(cell!.term); }}
-                        className="absolute bottom-1.5 right-1.5 rounded-full p-1 transition-colors hover:bg-black/10"
-                        style={{ color: isMarked || isHighlighted ? "#1a2744" : isCallable ? "#F59E0B" : "#9CA3AF" }}
-                      >
-                        <Volume2 className="h-4 w-4" />
-                      </button>
-                    </>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* Legenda */}
-          <div className="flex flex-wrap gap-3 mt-3 text-xs font-semibold">
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded inline-block" style={{background:"#F59E0B",border:"2px solid #D97706"}} /> Marcado</span>
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded inline-block" style={{background:"#FEF9EC",border:"2px solid #F59E0B"}} /> Chamado — toque para marcar</span>
-            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded inline-block" style={{background:"#FDE68A",border:"2px solid #F59E0B"}} /> Bingo!</span>
-          </div>
-        </div>
-
-        {/* ── Painel da Sônia ── */}
-        <div className="flex flex-col gap-4">
-          {/* Card da definição atual */}
-          <motion.div
-            key={callIdx}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-3xl p-5 shadow-lg"
-            style={{ background: "linear-gradient(135deg,#FEF9EC,#FDE8CC)", border: "2px solid #F59E0B" }}
+          <button
+            onClick={newGame}
+            className="flex items-center gap-2 font-semibold text-sm px-4 h-9 rounded-lg border transition-colors"
+            style={{ background: FB.bg, border: `1.5px solid ${FB.border}`, color: FB.textPrimary }}
+            onMouseOver={e => (e.currentTarget.style.background = FB.border)}
+            onMouseOut={e => (e.currentTarget.style.background = FB.bg)}
           >
-            <div className="flex items-center gap-3 mb-3">
-              <img src={mascoteImg} alt="Sônia" className="h-14 w-14 rounded-full object-cover border-3 border-white shadow" />
-              <div>
-                <div className="font-bold text-sm" style={{ color: "#1a2744" }}>Sônia está chamando…</div>
-                <div className="text-xs" style={{ color: "#6B7280" }}>Chamada {callIdx + 1} de 24</div>
-              </div>
+            <RefreshCw className="h-4 w-4" /> Nova Cartela
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_310px] gap-4">
+          {/* ── Cartela ── */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ background: FB.white, boxShadow: FB.shadow }}
+          >
+            {/* Cabeçalho B-I-N-G-O */}
+            <div className="grid grid-cols-5" style={{ background: FB.blue }}>
+              {["B","I","N","G","O"].map(l => (
+                <div key={l} className="h-10 flex items-center justify-center font-black text-xl" style={{ color: FB.white }}>
+                  {l}
+                </div>
+              ))}
             </div>
 
-            <p className="text-base font-medium leading-relaxed mb-3" style={{ color: "#1a2744", minHeight: 60 }}>
-              "{currentEntry.definition}"
-            </p>
+            {/* Células */}
+            <div className="grid grid-cols-5 gap-1.5 p-2">
+              {grid.map((cell, pos) => {
+                const isFree      = cell === null;
+                const isMarked    = marked.has(pos);
+                const isHighlight = highlightedCells.has(pos);
+                const isCallable  = cell && calledTerms.has(cell.term);
+                const isClickable = cell && isCallable && !isMarked;
 
-            <div className="flex items-center gap-2">
-              <SpeakerButton text={currentEntry.definition} className="h-10 w-10 border-2 shrink-0" />
-              <Button
-                onClick={nextCall}
-                disabled={callIdx + 1 >= 24 || gameOver}
-                className="flex-1 h-10 font-bold rounded-full gap-1"
-                style={{ background: "#1a2744", color: "#fff" }}
-              >
-                Próxima <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
+                let bg     = FB.white;
+                let border = `1.5px solid ${FB.border}`;
+                let color  = FB.textMuted;
+                if (isFree)        { bg = FB.blue;       border = `1.5px solid ${FB.blue}`;      color = FB.white; }
+                else if (isHighlight){ bg = FB.green;    border = `2px solid ${FB.green}`;       color = FB.white; }
+                else if (isMarked) { bg = FB.blue;       border = `2px solid ${FB.blueDark}`;    color = FB.white; }
+                else if (isCallable){ bg = FB.blueLight; border = `2px solid ${FB.blue}`;        color = FB.blue;  }
 
-          {/* Histórico de chamadas */}
-          <div className="rounded-2xl p-4 flex flex-col gap-2" style={{ background: "#F9FAFB", border: "1.5px solid #E5E7EB" }}>
-            <div className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color: "#6B7280" }}>
-              Termos já chamados ({callIdx + 1})
-            </div>
-            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
-              {callOrder.slice(0, callIdx + 1).map((tIdx, i) => {
-                const t = TERMS[tIdx as number];
-                const gridPos = termToPos.get(t.term);
-                const isMarkedOnGrid = gridPos !== undefined && marked.has(gridPos);
                 return (
-                  <span
-                    key={i}
-                    className="px-2 py-0.5 rounded-full text-xs font-semibold"
+                  <motion.div
+                    key={pos}
+                    onClick={() => handleCellClick(pos)}
+                    whileHover={isClickable ? { scale: 1.03 } : {}}
+                    whileTap={isClickable ? { scale: 0.97 } : {}}
+                    className="relative flex flex-col items-center justify-center rounded-lg text-center font-semibold select-none transition-colors"
                     style={{
-                      background: isMarkedOnGrid ? "#F59E0B" : "#E5E7EB",
-                      color: isMarkedOnGrid ? "#fff" : "#374151",
+                      minHeight: "96px",
+                      padding: "8px 5px 26px",
+                      cursor: isClickable ? "pointer" : "default",
+                      background: bg,
+                      border,
+                      color,
                     }}
                   >
-                    {isMarkedOnGrid && <Star className="h-2.5 w-2.5 inline mb-0.5 mr-0.5" />}
-                    {t.term}
-                  </span>
+                    {isFree ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <img src={mascoteImg} alt="FREE" className="h-10 w-10 rounded-full object-cover ring-2 ring-white" />
+                        <span className="text-xs font-bold" style={{ color: FB.white }}>FREE</span>
+                      </div>
+                    ) : (
+                      <>
+                        {isMarked && (
+                          <span className="absolute top-1.5 left-2 text-base font-black leading-none" style={{ color: FB.white }}>✓</span>
+                        )}
+                        {isHighlight && !isMarked && (
+                          <span className="absolute top-1.5 left-2 text-base leading-none">★</span>
+                        )}
+                        <span
+                          className="leading-snug font-bold"
+                          style={{ fontSize: "clamp(20px, 1.5vw, 21px)", hyphens: "auto" }}
+                        >
+                          {cell!.term}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label={`Ouvir: ${cell!.term}`}
+                          onClick={(e) => { e.stopPropagation(); speakTerm(cell!.term); }}
+                          className="absolute bottom-1.5 right-1.5 rounded-full p-1 transition-opacity hover:opacity-70"
+                          style={{ color: isMarked || isHighlight ? FB.white : isCallable ? FB.blue : FB.border }}
+                        >
+                          <Volume2 className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
+                  </motion.div>
                 );
               })}
             </div>
+
+            {/* Legenda */}
+            <div className="flex flex-wrap gap-3 px-3 pb-3 text-xs font-semibold" style={{ color: FB.textMuted }}>
+              <span className="flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded inline-block" style={{ background: FB.blue }} /> Marcado
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded inline-block border-2" style={{ background: FB.blueLight, borderColor: FB.blue }} /> Chamado — toque para marcar
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded inline-block" style={{ background: FB.green }} /> Bingo!
+              </span>
+            </div>
           </div>
 
-          {/* Bingos conquistados */}
-          {celebratedLines.size > 0 && (
-            <div className="rounded-2xl p-4" style={{ background: "#FFFBEB", border: "2px solid #F59E0B" }}>
-              <div className="font-bold text-sm mb-1" style={{ color: "#92400E" }}>
-                🏆 Bingos: {celebratedLines.size}
+          {/* ── Painel da Sônia ── */}
+          <div className="flex flex-col gap-3">
+            {/* Card da definição (estilo "post" do Facebook) */}
+            <motion.div
+              key={callIdx}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-xl overflow-hidden"
+              style={{ background: FB.white, boxShadow: FB.shadow }}
+            >
+              {/* Cabeçalho do "post" */}
+              <div className="flex items-center gap-3 px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${FB.border}` }}>
+                <img src={mascoteImg} alt="Sônia" className="h-12 w-12 rounded-full object-cover ring-2" style={{ ringColor: FB.blue }} />
+                <div>
+                  <div className="font-bold leading-tight" style={{ color: FB.textPrimary }}>Sônia</div>
+                  <div className="text-xs" style={{ color: FB.textMuted }}>Chamada {callIdx + 1} de 24</div>
+                </div>
               </div>
-              <div className="text-xs" style={{ color: "#B45309" }}>
-                +{celebratedLines.size * 100} XP conquistados!
+
+              {/* Corpo do "post" */}
+              <div className="px-4 py-4">
+                <p className="text-base font-medium leading-relaxed" style={{ color: FB.textPrimary, minHeight: 64 }}>
+                  "{currentEntry.definition}"
+                </p>
+              </div>
+
+              {/* Ações (like/comment/share style) */}
+              <div
+                className="flex items-center gap-2 px-4 pb-4"
+                style={{ borderTop: `1px solid ${FB.border}`, paddingTop: "12px" }}
+              >
+                <div className="flex-shrink-0">
+                  <SpeakerButton text={currentEntry.definition} className="h-10 w-10 border-0" />
+                </div>
+                <button
+                  onClick={nextCall}
+                  disabled={callIdx + 1 >= 24 || gameOver}
+                  className="flex-1 h-10 rounded-lg font-bold flex items-center justify-center gap-1 text-sm transition-colors disabled:opacity-50"
+                  style={{ background: FB.blue, color: FB.white }}
+                  onMouseOver={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = FB.blueDark; }}
+                  onMouseOut={e => { e.currentTarget.style.background = FB.blue; }}
+                >
+                  Próxima <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </motion.div>
+
+            {/* Histórico (estilo sidebar do Facebook) */}
+            <div
+              className="rounded-xl p-4"
+              style={{ background: FB.white, boxShadow: FB.shadow }}
+            >
+              <div className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: FB.textMuted }}>
+                Termos já chamados ({callIdx + 1})
+              </div>
+              <div className="flex flex-wrap gap-1.5 max-h-44 overflow-y-auto">
+                {callOrder.slice(0, callIdx + 1).map((tIdx, i) => {
+                  const t = TERMS[tIdx as number];
+                  const gridPos = termToPos.get(t.term);
+                  const isMarkedOnGrid = gridPos !== undefined && marked.has(gridPos);
+                  return (
+                    <span
+                      key={i}
+                      className="px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1"
+                      style={{
+                        background: isMarkedOnGrid ? FB.blue : FB.bg,
+                        color: isMarkedOnGrid ? FB.white : FB.textPrimary,
+                      }}
+                    >
+                      {isMarkedOnGrid && <Star className="h-2.5 w-2.5" />}
+                      {t.term}
+                    </span>
+                  );
+                })}
               </div>
             </div>
-          )}
+
+            {/* Bingos conquistados */}
+            {celebratedLines.size > 0 && (
+              <div
+                className="rounded-xl p-4"
+                style={{ background: FB.greenLight, border: `1.5px solid ${FB.green}`, boxShadow: FB.shadow }}
+              >
+                <div className="font-bold text-sm mb-0.5" style={{ color: FB.green }}>
+                  🏆 {celebratedLines.size} {celebratedLines.size === 1 ? "Bingo" : "Bingos"} conquistado{celebratedLines.size > 1 ? "s" : ""}!
+                </div>
+                <div className="text-xs font-semibold" style={{ color: "#2D7A1F" }}>
+                  +{celebratedLines.size * 100} XP ganhos
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
