@@ -8,6 +8,7 @@ import { Layout } from "@/components/layout";
 import Home from "@/pages/home";
 import Quiz from "@/pages/quiz";
 import Academia from "@/pages/academia";
+import Bingo from "@/pages/bingo";
 import Match from "@/pages/match";
 import Dashboard from "@/pages/dashboard";
 import Chat from "@/pages/chat";
@@ -23,6 +24,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/quiz" component={Quiz} />
         <Route path="/academia" component={Academia} />
+        <Route path="/bingo" component={Bingo} />
         <Route path="/match" component={Match} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/chat" component={Chat} />

@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { SpeakerButton } from "@/components/speaker-button";
-import { AlertCircle, GraduationCap, UserCheck, User, ArrowRight, MessageCircle, Shield } from "lucide-react";
+import { AlertCircle, GraduationCap, UserCheck, User, ArrowRight, MessageCircle, Shield, Grid3X3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -27,6 +27,15 @@ const cards = [
     iconBg: "#DBEAFE",
     iconColor: "#2563EB",
     badge: "5 missões",
+  },
+  {
+    title: "Bingo Cívico 🎱",
+    description: "Jogue bingo aprendendo termos e conceitos da democracia brasileira.",
+    icon: Grid3X3,
+    path: "/bingo",
+    iconBg: "#FEF3C7",
+    iconColor: "#D97706",
+    badge: "Novo! 🎉",
   },
   {
     title: "Match de Candidatos",
