@@ -41,7 +41,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
 
-          <div>
             {/* Accessibility buttons */}
             <div className="flex gap-2 shrink-0">
               <button
@@ -60,19 +59,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
               >
                 <Sun className="h-4 w-4" />
               </button>
+                  {/* Hamburger — all screen sizes */}
+              <button
+                className="h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-amber-100 transition-colors shrink-0"
+                onClick={() => setMenuOpen(v => !v)}
+                aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+                aria-expanded={menuOpen}
+                data-testid="button-hamburger"
+              >
+                {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
             </div>
 
-            {/* Hamburger — all screen sizes */}
-            <button
-              className="h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-amber-100 transition-colors shrink-0"
-              onClick={() => setMenuOpen(v => !v)}
-              aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
-              aria-expanded={menuOpen}
-              data-testid="button-hamburger"
-            >
-              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
+        
         </div>
 
         {/* Dropdown menu */}
