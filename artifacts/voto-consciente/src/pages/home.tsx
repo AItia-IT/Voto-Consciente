@@ -114,11 +114,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Neutrality note */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium" style={{ background: "#F0FDF4", color: "#15803D", border: "1px solid #BBF7D0" }}>
-            <Shield className="h-4 w-4" />
-            Plataforma neutra. Não recomendamos partidos ou candidatos.
-          </div>
         </motion.div>
 
         {/* Right — Sônia card */}
