@@ -3,7 +3,7 @@ import { useTTS } from "@/hooks/use-tts";
 import { Button } from "@/components/ui/button";
 import { Volume2, Square } from "lucide-react";
 
-export function SpeakerButton({ text, className = "", style }: { text: string, className?: string, style?: React.CSSProperties }) {
+export function SpeakerButton({ text = "", className = "", style }: { text?: string, className?: string, style?: React.CSSProperties }) {
   const { speak, stop, isSpeaking } = useTTS();
 
   return (

@@ -289,6 +289,14 @@ export default function Bingo() {
               ) : (
                 <span className="leading-tight px-0.5">{cell.term}</span>
               )}
+               <div
+                className="absolute bottom-3 right-10"
+              >
+                <SpeakerButton
+                  text={cell.term}
+                  className="h-9 w-9 bg-white shadow-sm"
+                />
+              </div>
             </motion.button>
           );
         })}
