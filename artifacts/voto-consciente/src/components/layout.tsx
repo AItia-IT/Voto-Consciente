@@ -28,7 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[100dvh] pb-24 relative flex flex-col">
       <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-border z-50 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center gap-3">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
 
           {/* Logo */}
           <Link href="/">
@@ -41,36 +41,38 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
 
-          {/* Accessibility buttons */}
-          <div className="flex gap-2 shrink-0">
+          <div>
+            {/* Accessibility buttons */}
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={cycleFontSize}
+                className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-sm font-bold hover:bg-amber-100 transition-colors"
+                data-testid="button-cycle-font"
+                aria-label="Alterar tamanho da fonte"
+              >
+                A±
+              </button>
+              <button
+                onClick={toggleContrast}
+                className="h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-amber-100 transition-colors"
+                data-testid="button-toggle-contrast"
+                aria-label="Alternar alto contraste"
+              >
+                <Sun className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Hamburger — all screen sizes */}
             <button
-              onClick={cycleFontSize}
-              className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-sm font-bold hover:bg-amber-100 transition-colors"
-              data-testid="button-cycle-font"
-              aria-label="Alterar tamanho da fonte"
+              className="h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-amber-100 transition-colors shrink-0"
+              onClick={() => setMenuOpen(v => !v)}
+              aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+              aria-expanded={menuOpen}
+              data-testid="button-hamburger"
             >
-              A±
-            </button>
-            <button
-              onClick={toggleContrast}
-              className="h-9 w-9 rounded-full bg-muted flex items-center justify-center hover:bg-amber-100 transition-colors"
-              data-testid="button-toggle-contrast"
-              aria-label="Alternar alto contraste"
-            >
-              <Sun className="h-4 w-4" />
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
-
-          {/* Hamburger — all screen sizes */}
-          <button
-            className="h-10 w-10 rounded-full bg-muted flex items-center justify-center hover:bg-amber-100 transition-colors shrink-0"
-            onClick={() => setMenuOpen(v => !v)}
-            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
-            aria-expanded={menuOpen}
-            data-testid="button-hamburger"
-          >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
         </div>
 
         {/* Dropdown menu */}
