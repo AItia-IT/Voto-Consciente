@@ -255,7 +255,7 @@ export default function Bingo() {
               whileTap={!isMarked ? { scale: 0.93 } : {}}
               animate={isWrong ? { x: [-6, 6, -4, 4, 0] } : {}}
               transition={isWrong ? { duration: 0.35 } : { type: "spring", stiffness: 300 }}
-              className="relative aspect-square rounded-xl flex items-center justify-center text-center p-2 font-bold leading-tight focus:outline-none select-none"
+              className="relative aspect-square rounded-xl flex items-center justify-center text-center text-2xl p-2 font-bold leading-tight focus:outline-none select-none"
               style={{
                 background: isBingo
                   ? "#F59E0B"
