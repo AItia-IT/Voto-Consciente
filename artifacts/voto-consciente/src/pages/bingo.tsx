@@ -42,33 +42,41 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// Bingo grid: 5×5 = 25 cells; index 12 is FREE (center)
+// Bingo grid: 4×4 = 16 cells; index 5 is FREE (row 1, col 1)
+const FREE_IDX = 5;
 function buildGrid(terms: typeof TERMS) {
-  const shuffled = shuffle(terms).slice(0, 24);
+  const shuffled = shuffle(terms).slice(0, 15);
   const grid: Array<{ term: string; definition: string } | null> = [];
-  for (let i = 0; i < 25; i++) {
-    if (i === 12) grid.push(null); // FREE
-    else grid.push(shuffled[i < 12 ? i : i - 1]);
+  for (let i = 0; i < 16; i++) {
+    if (i === FREE_IDX) grid.push(null); // FREE
+    else grid.push(shuffled[i < FREE_IDX ? i : i - 1]);
   }
   return grid;
 }
 
-// All winning lines (rows + cols + diagonals)
+// All winning lines for 4×4 (rows + cols + diagonals)
 const LINES = [
-  [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], // rows
-  [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], // cols
-  [0,6,12,18,24],[4,8,12,16,20], // diagonals
+  [0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15], // rows
+  [0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15], // cols
+  [0,5,10,15],[3,6,9,12], // diagonals
 ];
 
 function checkBingo(marked: Set<number>): number[][] {
   return LINES.filter(line => line.every(i => marked.has(i)));
 }
 
+function initGame() {
+  const grid = buildGrid(TERMS);
+  // callOrder only uses the 15 terms actually on the grid
+  const gridTerms = grid.filter(Boolean) as { term: string; definition: string }[];
+  const callOrder = shuffle(gridTerms);
+  return { grid, callOrder };
+}
+
 export default function Bingo() {
-  const [grid, setGrid] = useState(() => buildGrid(TERMS));
-  const [callOrder, setCallOrder] = useState(() => shuffle(TERMS));
+  const [{ grid, callOrder }, setGame] = useState(() => initGame());
   const [callIndex, setCallIndex] = useState(0);
-  const [marked, setMarked] = useState<Set<number>>(() => new Set([12])); // FREE center
+  const [marked, setMarked] = useState<Set<number>>(() => new Set([FREE_IDX])); // FREE
   const [bingoLines, setBingoLines] = useState<number[][]>([]);
   const [xpAwarded, setXpAwarded] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
@@ -79,7 +87,7 @@ export default function Bingo() {
   const currentCall = callOrder[callIndex] ?? null;
 
   const handleCellClick = useCallback((idx: number) => {
-    if (idx === 12) return; // FREE — already marked
+    if (idx === FREE_IDX) return; // FREE — already marked
     const cell = grid[idx];
     if (!cell || !currentCall) return;
     if (marked.has(idx)) return;
@@ -104,7 +112,7 @@ export default function Bingo() {
       setMarked(newMarked);
 
       // Check if full board complete
-      if (newMarked.size === 25) {
+      if (newMarked.size === 16) {
         completeMission(99); // special bingo mission id
         addXP(200);
         setXpAwarded(prev => prev + 200);
@@ -123,10 +131,9 @@ export default function Bingo() {
   }, [grid, marked, currentCall, callIndex, callOrder, prevBingoCount]);
 
   const newGame = useCallback(() => {
-    setGrid(buildGrid(TERMS));
-    setCallOrder(shuffle(TERMS));
+    setGame(initGame());
     setCallIndex(0);
-    setMarked(new Set([12]));
+    setMarked(new Set([FREE_IDX]));
     setBingoLines([]);
     setPrevBingoCount(0);
     setShowComplete(false);
@@ -148,7 +155,7 @@ export default function Bingo() {
           <h1 className="text-3xl font-extrabold text-yellow-800 mb-2">CARTELA COMPLETA!</h1>
           <h2 className="text-xl font-bold text-yellow-900 mb-4">Cidadão Democrata</h2>
           <p className="text-lg text-yellow-700 mb-4">
-            Você acertou todos os 24 termos cívicos! Incrível!
+            Você acertou todos os 15 termos cívicos! Incrível!
           </p>
           <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full font-bold text-lg">
             🏆 +{xpAwarded + 200} XP ganhos!
@@ -214,7 +221,7 @@ export default function Bingo() {
       {/* XP + Bingo count bar */}
       <div className="flex items-center justify-between mb-3 px-1">
         <span className="text-sm font-bold" style={{ color: "#6B7280" }}>
-          ✅ {marked.size - 1}/24 marcados
+          ✅ {marked.size - 1}/15 marcados
         </span>
         {bingoLines.length > 0 && (
           <span className="text-sm font-bold px-3 py-1 rounded-full"
@@ -248,11 +255,11 @@ export default function Bingo() {
         )}
       </AnimatePresence>
 
-      {/* 5×5 Bingo Grid */}
-      <div className="grid grid-cols-5 gap-1.5">
+      {/* 4×4 Bingo Grid */}
+      <div className="grid grid-cols-4 gap-2">
         {grid.map((cell, idx) => {
           const isMarked = marked.has(idx);
-          const isFree = idx === 12;
+          const isFree = idx === FREE_IDX;
           const isBingo = isBingoCell(idx);
           const isWrong = wrongCell === idx;
 
