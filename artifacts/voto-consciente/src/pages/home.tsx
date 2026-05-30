@@ -1,7 +1,5 @@
-import { useEffect } from "react";
 import { Link } from "wouter";
 import { SpeakerButton } from "@/components/speaker-button";
-import { useTTS } from "@/hooks/use-tts";
 import { AlertCircle, GraduationCap, UserCheck, User, ArrowRight, MessageCircle, Shield, Grid3X3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,14 +67,6 @@ const cards = [
 ];
 
 export default function Home() {
-  const { speak } = useTTS();
-
-  // Auto-read Sônia's greeting on mount so illiterate users hear the welcome
-  useEffect(() => {
-    const t = setTimeout(() => speak(soniaMessage), 1800);
-    return () => clearTimeout(t);
-  }, []);
-
   return (
     <div className="pb-8">
       {/* ── HERO ── */}

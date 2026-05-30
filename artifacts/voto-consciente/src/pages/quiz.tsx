@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SpeakerButton } from "@/components/speaker-button";
-import { useTTS } from "@/hooks/use-tts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,24 +24,6 @@ export default function Quiz() {
   const [feedback, setFeedback] = useState<{isCorrect: boolean, explanation: string} | null>(null);
   const [finished, setFinished] = useState(false);
   const [earnedMedals, setEarnedMedals] = useState<string[]>([]);
-
-  const { speak } = useTTS();
-
-  // Auto-read each question when it appears
-  useEffect(() => {
-    if (!started || feedback !== null || finished) return;
-    const current = QUIZ_ITEMS[currentIndex];
-    const t = setTimeout(() => speak(`Questão ${currentIndex + 1}. ${current.text}`), 700);
-    return () => clearTimeout(t);
-  }, [started, currentIndex, feedback, finished]);
-
-  // Auto-read feedback when it appears
-  useEffect(() => {
-    if (!feedback) return;
-    const prefix = feedback.isCorrect ? 'Você acertou! ' : 'Você errou. ';
-    const t = setTimeout(() => speak(prefix + feedback.explanation), 600);
-    return () => clearTimeout(t);
-  }, [feedback]);
 
   const handleStart = () => {
     setStarted(true);
