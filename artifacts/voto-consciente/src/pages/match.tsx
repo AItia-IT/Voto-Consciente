@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { SpeakerButton } from "@/components/speaker-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -82,13 +83,16 @@ const CANDIDATE_PROPOSALS: Record<string, Record<string, 'A'|'B'|'C'>> = {
   "FELIPE RIGONI":       { saude:'C', educacao:'C', seguranca:'B', transporte:'C', economia:'C', ambiente:'B', inclusao:'B' },
 };
 
+const DISCLAIMER_TEXT = "Aviso Importante: Esta ferramenta tem caráter exclusivamente informativo. O objetivo é apresentar informações de forma neutra para apoiar sua própria análise. A decisão de voto é sempre livre e individual.";
+
 function Disclaimer() {
   return (
     <div className="bg-blue-50 border-2 border-blue-200 p-5 rounded-xl flex items-start gap-4 mb-6 shadow-sm">
       <AlertCircle className="h-8 w-8 text-blue-600 shrink-0 mt-1" />
-      <p className="text-lg text-blue-900 leading-relaxed font-medium">
+      <p className="text-lg text-blue-900 leading-relaxed font-medium flex-1">
         <strong>Aviso Importante:</strong> Esta ferramenta tem caráter exclusivamente informativo. O objetivo é apresentar informações de forma neutra para apoiar sua própria análise. A decisão de voto é sempre livre e individual.
       </p>
+      <SpeakerButton text={DISCLAIMER_TEXT} className="shrink-0 h-10 w-10" />
     </div>
   );
 }
@@ -203,11 +207,15 @@ export default function Match() {
   };
 
   if (!started) {
+    const introText = "Match de Candidatos. Descubra quais candidatos mais combinam com suas ideias. Responda 7 perguntas sobre temas importantes e veja sua compatibilidade.";
     return (
       <div className="flex flex-col items-center py-6 min-h-[70vh] max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <div className="text-6xl bg-primary/10 p-6 rounded-full inline-block mb-4">🤝</div>
-          <h1 className="text-4xl font-extrabold text-foreground mb-2">Match de Candidatos</h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <h1 className="text-4xl font-extrabold text-foreground">Match de Candidatos</h1>
+            <SpeakerButton text={introText} />
+          </div>
           <p className="text-xl text-muted-foreground">Descubra quais candidatos mais combinam com suas ideias.</p>
         </div>
         
@@ -260,6 +268,7 @@ export default function Match() {
   }
 
   const theme = THEMES[currentTheme];
+  const themeAudioText = `Tema: ${theme.title}. O que você considera mais importante? Opção A: ${theme.options[0]?.text ?? ""}. Opção B: ${theme.options[1]?.text ?? ""}. Opção C: ${theme.options[2]?.text ?? ""}.`;
 
   return (
     <div className="flex flex-col min-h-[70vh] py-4 max-w-2xl mx-auto">
@@ -268,12 +277,15 @@ export default function Match() {
         <div className="w-full bg-muted rounded-full h-3 mb-6">
           <div className="bg-primary h-3 rounded-full transition-all duration-300" style={{ width: `${((currentTheme) / THEMES.length) * 100}%` }} />
         </div>
-        <h2 className="text-4xl font-extrabold text-foreground">{theme.title}</h2>
+        <div className="flex items-center justify-center gap-3">
+          <h2 className="text-4xl font-extrabold text-foreground">{theme.title}</h2>
+          <SpeakerButton text={themeAudioText} />
+        </div>
         <p className="text-xl mt-2 font-medium text-muted-foreground">O que você considera mais importante?</p>
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.div 
+        <motion.div
           key={currentTheme}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -281,18 +293,20 @@ export default function Match() {
           className="flex-1 flex flex-col gap-4 justify-center"
         >
           {theme.options.map((opt) => (
-            <Button 
-              key={opt.id}
-              variant="outline"
-              className="h-auto py-6 px-6 text-left justify-start text-2xl font-medium border-2 hover:bg-primary/5 hover:border-primary whitespace-normal bg-white"
-              onClick={() => handleAnswer(opt.id)}
-              data-testid={`button-match-option-${opt.id}`}
-            >
-              <span className="bg-muted text-muted-foreground w-10 h-10 rounded-full flex items-center justify-center shrink-0 mr-4 font-bold border border-border">
-                {opt.id}
-              </span>
-              <span className="text-foreground">{opt.text}</span>
-            </Button>
+            <div key={opt.id} className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 h-auto py-6 px-6 text-left justify-start text-2xl font-medium border-2 hover:bg-primary/5 hover:border-primary whitespace-normal bg-white"
+                onClick={() => handleAnswer(opt.id)}
+                data-testid={`button-match-option-${opt.id}`}
+              >
+                <span className="bg-muted text-muted-foreground w-10 h-10 rounded-full flex items-center justify-center shrink-0 mr-4 font-bold border border-border">
+                  {opt.id}
+                </span>
+                <span className="text-foreground">{opt.text}</span>
+              </Button>
+              <SpeakerButton text={opt.text} className="shrink-0 h-12 w-12" />
+            </div>
           ))}
         </motion.div>
       </AnimatePresence>

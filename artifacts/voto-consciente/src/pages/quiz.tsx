@@ -14,7 +14,7 @@ const QUIZ_ITEMS: QuizItem[] = [
   { id:3, text: '"Médico famoso descobriu chá que cura qualquer doença em 3 dias. Hospitais estão escondendo do povo!"', isFake: true, explanation: 'Fake! Curas milagrosas e conspirações médicas são sinais clássicos de desinformação. Consulte sempre um profissional de saúde.' },
   { id:4, text: '"O Bolsa Família é um programa federal de transferência de renda criado para apoiar famílias em situação de pobreza."', isFake: false, explanation: 'Verdade! O Bolsa Família existe desde 2003 e é comprovado por dados do governo federal.' },
   { id:5, text: '"Cientistas provaram que vacinas causam autismo — pesquisa foi censurada pela mídia!"', isFake: true, explanation: 'Fake! Esse estudo foi desmentido e o autor perdeu o registro médico por fraude. Vacinas são seguras e aprovadas por órgãos de saúde.' },
-  ];
+];
 
 export default function Quiz() {
   const [started, setStarted] = useState(false);
@@ -25,14 +25,12 @@ export default function Quiz() {
   const [finished, setFinished] = useState(false);
   const [earnedMedals, setEarnedMedals] = useState<string[]>([]);
 
-  const handleStart = () => {
-    setStarted(true);
-  };
+  const handleStart = () => setStarted(true);
 
   const handleAnswer = (isFake: boolean) => {
     const current = QUIZ_ITEMS[currentIndex];
     const isCorrect = isFake === current.isFake;
-    
+
     if (isCorrect) {
       setScore(s => s + 10);
       setStreak(s => s + 1);
@@ -42,11 +40,10 @@ export default function Quiz() {
 
     setFeedback({ isCorrect, explanation: current.explanation });
 
-    // Medal checks
     const newMedals: string[] = [];
     if (currentIndex === 0) newMedals.push("Iniciante Curioso");
     if (isCorrect && streak + 1 === 5) newMedals.push("Caçador de Fake News");
-    
+
     newMedals.forEach(m => {
       if (!getQuizMedals().includes(m)) {
         addMedal(m);
@@ -68,7 +65,7 @@ export default function Quiz() {
     addQuizScore(score);
     const newMedals: string[] = ["Verificador de Fontes"];
     if (score === QUIZ_ITEMS.length * 10) newMedals.push("Guardião da Informação");
-    
+
     newMedals.forEach(m => {
       if (!getQuizMedals().includes(m)) {
         addMedal(m);
@@ -90,10 +87,14 @@ export default function Quiz() {
   };
 
   if (!started) {
+    const introText = "Fake ou Fato? Leia a mensagem e diga se é uma notícia falsa ou informação verdadeira. Vamos testar seus conhecimentos!";
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 max-w-md mx-auto">
         <div className="text-6xl bg-primary/10 p-6 rounded-full">🧠</div>
-        <h1 className="text-4xl font-bold text-foreground">Fake ou Fato?</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-4xl font-bold text-foreground">Fake ou Fato?</h1>
+          <SpeakerButton text={introText} />
+        </div>
         <p className="text-xl max-w-[250px] mx-auto text-muted-foreground">
           Leia a mensagem e diga se é uma notícia falsa ou informação verdadeira. Vamos testar seus conhecimentos!
         </p>
@@ -105,25 +106,30 @@ export default function Quiz() {
   }
 
   if (finished) {
+    const resultsText = `Quiz Concluído! Sua pontuação foi ${score} de ${QUIZ_ITEMS.length * 10} pontos.${earnedMedals.length > 0 ? ` Você desbloqueou as medalhas: ${earnedMedals.join(", ")}.` : ""}`;
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center space-y-6 max-w-md mx-auto">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-7xl">🏆</motion.div>
-        <h2 className="text-4xl font-bold text-foreground">Quiz Concluído!</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-4xl font-bold text-foreground">Quiz Concluído!</h2>
+          <SpeakerButton text={resultsText} />
+        </div>
         <p className="text-2xl text-muted-foreground">Sua pontuação: <span className="font-bold text-primary">{score}</span> / {QUIZ_ITEMS.length * 10}</p>
-        
+
         {earnedMedals.length > 0 && (
           <div className="w-full bg-accent/20 p-6 rounded-2xl border border-accent">
             <h3 className="font-bold text-xl mb-4 text-foreground">Novas Medalhas Desbloqueadas:</h3>
             <div className="flex flex-col gap-3">
               {earnedMedals.map(m => (
-                <div key={m} className="bg-card p-3 rounded-lg flex items-center justify-center shadow-sm">
+                <div key={m} className="bg-card p-3 rounded-lg flex items-center justify-center gap-3 shadow-sm">
                   <span className="text-xl font-bold text-foreground">{m}</span>
+                  <SpeakerButton text={`Medalha desbloqueada: ${m}`} className="h-9 w-9" />
                 </div>
               ))}
             </div>
           </div>
         )}
-        
+
         <Button onClick={restartQuiz} className="w-full text-2xl h-16 mt-8" variant="outline" data-testid="button-restart-quiz">
           Jogar Novamente
         </Button>
@@ -147,7 +153,7 @@ export default function Quiz() {
 
       <AnimatePresence mode="wait">
         {!feedback ? (
-          <motion.div 
+          <motion.div
             key="question"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -166,16 +172,16 @@ export default function Quiz() {
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
-              <Button 
-                onClick={() => handleAnswer(true)} 
-                variant="destructive" 
+              <Button
+                onClick={() => handleAnswer(true)}
+                variant="destructive"
                 className="h-20 text-2xl shadow-md font-bold w-full"
                 data-testid="button-answer-fake"
               >
                 📰 Fake News
               </Button>
-              <Button 
-                onClick={() => handleAnswer(false)} 
+              <Button
+                onClick={() => handleAnswer(false)}
                 className="h-20 text-2xl shadow-md font-bold bg-green-600 hover:bg-green-700 w-full"
                 data-testid="button-answer-fact"
               >
@@ -194,11 +200,17 @@ export default function Quiz() {
               <div className="flex flex-col md:flex-row items-center gap-6 mb-6">
                 <img src={mascoteImg} alt="Sônia" className="h-24 w-24 rounded-full object-cover border-4 border-white shadow-sm shrink-0" />
                 <div className="text-center md:text-left flex-1">
-                    <div className="text-4xl mb-2">{feedback.isCorrect ? '👏' : '❌'}</div>
+                  <div className="text-4xl mb-2">{feedback.isCorrect ? '👏' : '❌'}</div>
+                  <div className="flex items-center gap-3">
                     <h2 className="text-3xl font-bold">{feedback.isCorrect ? 'Você Acertou!' : 'Você Errou...'}</h2>
-                    <p className="text-lg font-medium opacity-80 mt-1">
-                        {feedback.isCorrect ? 'Muito bem! Você está aprendendo rápido.' : 'Excelente tentativa! Vamos descobrir juntos...'}
-                    </p>
+                    <SpeakerButton
+                      text={`${feedback.isCorrect ? 'Você Acertou!' : 'Você Errou.'} ${feedback.isCorrect ? 'Muito bem! Você está aprendendo rápido.' : 'Excelente tentativa! Vamos descobrir juntos...'}`}
+                      className="h-10 w-10 shrink-0"
+                    />
+                  </div>
+                  <p className="text-lg font-medium opacity-80 mt-1">
+                    {feedback.isCorrect ? 'Muito bem! Você está aprendendo rápido.' : 'Excelente tentativa! Vamos descobrir juntos...'}
+                  </p>
                 </div>
               </div>
               <div className="bg-white p-5 rounded-xl text-left relative shadow-sm border border-black/5">
@@ -208,7 +220,7 @@ export default function Quiz() {
                 </div>
               </div>
             </div>
-            
+
             <Button onClick={nextQuestion} className="w-full h-16 text-2xl mt-auto shadow-md" data-testid="button-next-question">
               Continuar
             </Button>
