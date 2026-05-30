@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "a35v98DwNP0ULW_VsbFxU"
+uri = "file://artifacts/tour-voto-consciente/public/images/medal.png"
+type = "image"
+title = "Gold star medal icon"
+
+[[generated]]
+id = "nKCs-eMZJGTi_9VlZReJj"
+uri = "file://artifacts/tour-voto-consciente/public/images/shield-alert.png"
+type = "image"
+title = "Security shield alert icon"

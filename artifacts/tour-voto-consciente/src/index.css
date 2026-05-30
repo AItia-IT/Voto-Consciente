@@ -1,27 +1,25 @@
 @import "tailwindcss";
 
-/* REPLACE THESE -- define your own palette and fonts for each video */
 :root {
-  --color-primary: #000000;
-  --color-secondary: #6B7280;
-  --color-accent: #3B82F6;
+  --color-primary: #1E3A5F;
+  --color-secondary: #F5A623;
+  --color-accent: #F4A7B9;
 
-  --color-bg-light: #FFFFFF;
-  --color-bg-dark: #0F172A;
-  --color-bg-muted: #F8FAFC;
+  --color-bg-light: #FFF8EE;
+  --color-bg-dark: #1E3A5F;
+  --color-bg-muted: #FDE8D3;
 
-  --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-text-primary: #1E3A5F;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748B;
   --color-text-inverse: #FFFFFF;
 
   --color-success: #10B981;
-  --color-warning: #F59E0B;
+  --color-warning: #F5A623;
   --color-error: #EF4444;
 
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Baloo 2', sans-serif;
+  --font-body: 'Nunito', sans-serif;
 }
 
 @theme inline {
@@ -40,7 +38,6 @@
   --color-error: var(--color-error);
   --font-display: var(--font-display);
   --font-body: var(--font-body);
-  --font-mono: var(--font-mono);
 }
 
 body {
