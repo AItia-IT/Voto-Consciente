@@ -2,6 +2,7 @@ import { Router } from "express";
 import { eq, ilike, or } from "drizzle-orm";
 import { db, conversations, messages, politicos, promessas, realizacoes } from "@workspace/db";
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { textToSpeech } from "@workspace/integrations-openai-ai-server/audio";
 
 const router = Router();
 
@@ -201,4 +202,24 @@ router.post("/conversations/:id/messages", async (req, res) => {
   }
 });
 
+// ── TTS ──────────────────────────────────────────────────────────────────────
+router.post("/tts", async (req, res) => {
+  try {
+    const { text } = req.body as { text?: string };
+    if (!text || typeof text !== "string" || text.trim().length === 0) {
+      res.status(400).json({ error: "Campo 'text' obrigatório" });
+      return;
+    }
+    const audioBuffer = await textToSpeech(text.trim(), "nova", "mp3");
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Length", audioBuffer.length);
+    res.setHeader("Cache-Control", "no-cache");
+    res.send(audioBuffer);
+  } catch (err) {
+    req.log?.error({ err }, "Erro no TTS");
+    res.status(500).json({ error: "Erro ao gerar áudio" });
+  }
+});
+
 export default router;
+

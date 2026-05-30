@@ -1,54 +1,60 @@
-import { useEffect, useRef, useState } from 'react';
-
-function getBestPtBRVoice(): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis.getVoices();
-  const ptBR = voices.filter(v => v.lang === 'pt-BR' || v.lang === 'pt_BR');
-  if (ptBR.length === 0) return null;
-  const priority = [
-    (v: SpeechSynthesisVoice) => v.name.toLowerCase().includes('google') && v.name.toLowerCase().includes('brasil'),
-    (v: SpeechSynthesisVoice) => v.name.toLowerCase().includes('google'),
-    (v: SpeechSynthesisVoice) => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('feminina'),
-    () => true,
-  ];
-  for (const test of priority) {
-    const match = ptBR.find(test);
-    if (match) return match;
-  }
-  return ptBR[0];
-}
+import { useRef, useState } from 'react';
 
 export function useTTS() {
   const [speaking, setSpeaking] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    window.speechSynthesis.getVoices();
-    const handleVoicesChanged = () => window.speechSynthesis.getVoices();
-    window.speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
-    return () => {
-      window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
-      window.speechSynthesis.cancel();
-    };
-  }, []);
+  const speak = async (text: string) => {
+    stop();
 
-  const speak = (text: string) => {
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = 'pt-BR';
-    utt.rate = 0.82;
-    utt.pitch = 1;
-    const voice = getBestPtBRVoice();
-    if (voice) utt.voice = voice;
-    utt.onend = () => setSpeaking(false);
-    utt.onerror = () => setSpeaking(false);
-    utteranceRef.current = utt;
     setSpeaking(true);
-    window.speechSynthesis.speak(utt);
+    try {
+      const response = await fetch('/api/openai/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) throw new Error('TTS request failed');
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      objectUrlRef.current = url;
+
+      const audio = new Audio(url);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        setSpeaking(false);
+        cleanup();
+      };
+      audio.onerror = () => {
+        setSpeaking(false);
+        cleanup();
+      };
+
+      await audio.play();
+    } catch {
+      setSpeaking(false);
+      cleanup();
+    }
+  };
+
+  const cleanup = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+    audioRef.current = null;
   };
 
   const stop = () => {
-    window.speechSynthesis.cancel();
-    utteranceRef.current = null;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    cleanup();
     setSpeaking(false);
   };
 
