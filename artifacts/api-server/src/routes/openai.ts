@@ -204,22 +204,26 @@ router.post("/conversations/:id/messages", async (req, res) => {
 
 // ── TTS helper ───────────────────────────────────────────────────────────────
 async function textToSpeechForSeniors(text: string): Promise<Buffer> {
-  const response = await openai.chat.completions.create({
-    model: "gpt-audio",
+const response = await openai.chat.completions.create({
+    model: "gpt-4o-audio-preview", // Ou o modelo de áudio específico que você está utilizando
     modalities: ["text", "audio"],
     audio: { voice: "shimmer", format: "mp3" },
+    temperature: 0.0, // <- Zera a criatividade do modelo
+    top_p: 0.0,       // <- Garante precisão máxima na escolha das palavras
     messages: [
       {
         role: "system",
         content:
           "Você é uma locutora brasileira calorosa, paciente e acolhedora, especializada em falar com idosos. " +
-          "Fale de forma muito lenta, pausada e clara, como se estivesse explicando algo com carinho a um familiar mais velho. " +
+          "Fale de forma lenta e clara, como se estivesse explicando algo com carinho a um familiar mais velho. " +
           "Use um tom de voz suave, gentil e tranquilizador. Faça pausas naturais entre as frases. " +
-          "Nunca apresse a fala. Reproduza o texto exatamente como recebido, sem omitir nem acrescentar palavras.",
+          "Nunca apresse a fala. " +
+          "REGRA ABSOLUTA: Reproduza APENAS o texto fornecido pelo usuário dentro das tags <texto>. " +
+          "Não ignore, não mude, não comente e não acrescente NENHUMA palavra (nem mesmo saudações).",
       },
       {
         role: "user",
-        content: `Leia o seguinte texto em voz alta, de forma lenta e acolhedora:\n\n${text}`,
+        content: `<texto>\n${text}\n</texto>`, // <- Isola o conteúdo para o modelo não se confundir
       },
     ],
   });
