@@ -1,0 +1,328 @@
+Crie um vídeo de apresentação interativo, educativo e acolhedor para a plataforma **Voto Consciente**, utilizando a mascote oficial como personagem principal e guia da experiência.
+
+O vídeo deve ser pensado especialmente para pessoas idosas, considerando diferentes níveis de escolaridade, familiaridade com tecnologia, condições visuais e auditivas, e diferentes contextos sociais e culturais.
+
+---
+
+# Objetivo do Vídeo
+
+O vídeo deve:
+
+* Receber o usuário de forma calorosa e respeitosa.
+* Reduzir a insegurança com tecnologia.
+* Mostrar que não existem respostas erradas durante o aprendizado.
+* Explicar os recursos da plataforma de forma simples.
+* Ensinar conceitos básicos sobre informação confiável e democracia.
+* Incentivar curiosidade, autonomia e pensamento crítico.
+* Fazer o usuário sentir que pertence ao ambiente.
+* Criar confiança sem infantilizar o público.
+
+O tom deve transmitir:
+
+* acolhimento
+* respeito
+* paciência
+* segurança
+* curiosidade
+* esperança
+
+---
+
+# Duração
+
+Entre 2 e 3 minutos.
+
+---
+
+# Estilo Visual
+
+Mistura de:
+
+* animação moderna
+* ilustração amigável
+* storytelling leve
+* interface gamificada
+
+Referências:
+
+* Duolingo
+* Khan Academy Kids
+* Google Accessibility
+* Sesame Workshop
+* TED-Ed
+
+---
+
+# Diretrizes de Inclusão
+
+O vídeo deve representar:
+
+* mulheres
+* homens
+* pessoas negras
+* pessoas brancas
+* pessoas indígenas
+* pessoas com deficiência
+* diferentes faixas etárias dentro do público 60+
+* diferentes contextos econômicos
+
+Mostrar:
+
+* idosos utilizando celular
+* idosos utilizando computador
+* idosos utilizando tablet
+
+Representar pessoas:
+
+* usando óculos
+* usando aparelho auditivo
+* utilizando recursos de acessibilidade
+
+Nunca representar idosos como incapazes.
+
+O foco deve ser:
+
+"Você já tem experiência de vida. Estamos apenas oferecendo novas ferramentas."
+
+---
+
+# Personagem Principal
+
+Utilizar a mascote oficial como narradora.
+
+Características da mascote:
+
+* amigável
+* paciente
+* confiável
+* carismática
+* respeitosa
+* otimista
+
+A mascote deve interagir diretamente com o usuário.
+
+Olhar para a câmera.
+
+Apontar elementos da interface.
+
+Celebrar conquistas.
+
+Estimular curiosidade.
+
+---
+
+# Cena 1 — Boas-vindas
+
+Ambiente iluminado e acolhedor.
+
+A mascote aparece caminhando pela tela.
+
+Fala:
+
+"Olá! Que bom ver você aqui."
+
+"Pela internet, recebemos informações o tempo todo."
+
+"Mas nem sempre é fácil saber no que confiar."
+
+"E tudo bem."
+
+"Estamos aqui para aprender juntos."
+
+A câmera aproxima suavemente.
+
+Aparecem pessoas idosas sorrindo e explorando a plataforma.
+
+---
+
+# Cena 2 — Fake ou Fato?
+
+Mostrar a tela do quiz.
+
+Exemplo de manchete aparece.
+
+A mascote pergunta:
+
+"Você acha que isso é verdadeiro ou falso?"
+
+Botões grandes:
+
+✅ Fato
+
+❌ Fake
+
+O usuário escolhe.
+
+Independentemente da resposta:
+
+A mascote responde:
+
+"Excelente tentativa!"
+
+"Vamos descobrir juntos."
+
+A plataforma explica os sinais utilizados para identificar a informação.
+
+Mostrar:
+
+* fonte
+* data
+* contexto
+* evidências
+
+A mascote reforça:
+
+"Não precisamos acreditar em tudo imediatamente."
+
+"Podemos verificar primeiro."
+
+---
+
+# Cena 3 — Academia da Democracia
+
+Transição para uma trilha gamificada.
+
+Cada etapa representa um aprendizado.
+
+A mascote fala:
+
+"Você já se perguntou como funcionam as decisões que impactam nosso dia a dia?"
+
+Mostrar missões:
+
+* Como funcionam as eleições
+* O papel dos vereadores
+* O papel dos deputados
+* O papel do presidente
+* Direitos e deveres dos cidadãos
+
+Cada missão concluída gera:
+
+* estrelas
+* medalhas
+* certificados
+
+A mascote comemora:
+
+"Mais um aprendizado conquistado!"
+
+---
+
+# Cena 4 — Descobrindo Candidatos
+
+Mostrar o sistema de compatibilidade.
+
+A mascote explica:
+
+"Esta ferramenta não diz em quem votar."
+
+"Ela apenas ajuda você a conhecer melhor as propostas dos candidatos."
+
+Mostrar perguntas simples:
+
+* O que é mais importante para você?
+* Saúde?
+* Educação?
+* Segurança?
+* Transporte?
+
+Após as respostas:
+
+Mostrar um painel neutro.
+
+Percentuais de compatibilidade aparecem.
+
+A mascote explica:
+
+"Agora você pode comparar propostas e tirar suas próprias conclusões."
+
+Inserir destaque visual:
+
+"Sua escolha continua sendo totalmente livre."
+
+---
+
+# Cena 5 — Segurança Digital
+
+Mostrar mensagens falsas circulando.
+
+A mascote pausa a tela.
+
+Transforma sinais de alerta em ícones visuais.
+
+Mostrar:
+
+* links suspeitos
+* mensagens alarmistas
+* falta de fonte
+* conteúdo fora de contexto
+
+A mascote fala:
+
+"Quando temos dúvidas, verificar é sempre uma boa ideia."
+
+---
+
+# Cena 6 — Celebração da Jornada
+
+Mostrar usuários completando atividades.
+
+Mostrar:
+
+* medalhas
+* certificados
+* progresso
+
+A mascote caminha ao lado dos usuários.
+
+Fala:
+
+"Aprender não tem idade."
+
+"Sua experiência de vida é valiosa."
+
+"E cada novo conhecimento fortalece sua participação na sociedade."
+
+---
+
+# Encerramento Emocional
+
+A câmera se afasta lentamente.
+
+A mascote olha diretamente para o usuário.
+
+Fala:
+
+"Informação confiável fortalece escolhas conscientes."
+
+"Conhecimento fortalece a democracia."
+
+"E sua voz importa."
+
+Aparece a mensagem final:
+
+### Voto Consciente
+
+**Aprender. Refletir. Escolher.**
+
+Tela final com animação suave da mascote acenando.
+
+---
+
+# Requisitos Técnicos
+
+* Narração em português brasileiro.
+* Voz calma e clara.
+* Velocidade de fala reduzida.
+* Legendas sincronizadas.
+* Audiodescrição opcional.
+* Alto contraste visual.
+* Compatível com dispositivos móveis.
+* Animações suaves.
+* Sem excesso de elementos na tela.
+* Interações simuladas durante o vídeo para aumentar engajamento.
+* Qualidade cinematográfica.
+* Estilo Pixar educativo + Duolingo + acessibilidade governamental moderna.
+* Expressões faciais naturais e empáticas.
+* Transições suaves e intuitivas.
+* Foco absoluto em inclusão, autonomia, cidadania e pensamento crítico.

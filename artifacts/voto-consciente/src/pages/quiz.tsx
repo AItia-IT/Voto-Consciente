@@ -52,8 +52,10 @@ export default function Quiz() {
     if (isCorrect && streak + 1 === 5) newMedals.push("Caçador de Fake News");
     
     newMedals.forEach(m => {
-      addMedal(m);
-      if (!getQuizMedals().includes(m)) setEarnedMedals(prev => [...prev, m]);
+      if (!getQuizMedals().includes(m)) {
+        addMedal(m);
+        setEarnedMedals(prev => [...prev, m]);
+      }
     });
   };
 
@@ -72,8 +74,10 @@ export default function Quiz() {
     if (score === QUIZ_ITEMS.length * 10) newMedals.push("Guardião da Informação");
     
     newMedals.forEach(m => {
-      addMedal(m);
-      if (!getQuizMedals().includes(m)) setEarnedMedals(prev => [...prev, m]);
+      if (!getQuizMedals().includes(m)) {
+        addMedal(m);
+        setEarnedMedals(prev => [...prev, m]);
+      }
     });
 
     setFinished(true);

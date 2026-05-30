@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, CheckCircle2, XCircle } from "lucide-react";
 
 type Theme = {
   id: string;
@@ -67,6 +67,67 @@ function Disclaimer() {
   );
 }
 
+function CandidateProposalDetail({ candidate, answers }: { candidate: Candidate & { match: number }; answers: Record<string, 'A'|'B'|'C'> }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <Card className="overflow-hidden border-2 border-border shadow-sm">
+      <CardContent className="p-0">
+        <div className="flex items-center p-4 gap-4 bg-muted/30">
+          <div className="text-5xl bg-background p-2 rounded-xl shadow-sm">{candidate.photo}</div>
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold">{candidate.name}</h3>
+            <p className="text-lg text-muted-foreground">{candidate.party}</p>
+          </div>
+          <div className="text-right">
+            <span className="text-3xl font-extrabold text-primary">{candidate.match}%</span>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Match</p>
+          </div>
+        </div>
+        <div className="h-4 w-full bg-muted">
+          <div
+            className="h-full bg-primary transition-all duration-1000 ease-out"
+            style={{ width: `${candidate.match}%` }}
+          />
+        </div>
+        <button
+          className="w-full flex items-center justify-center gap-2 py-3 text-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+          onClick={() => setExpanded(e => !e)}
+          data-testid={`button-expand-candidate-${candidate.name.replace(/\s+/g, '-')}`}
+        >
+          {expanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          {expanded ? "Ocultar propostas" : "Ver propostas por tema"}
+        </button>
+        {expanded && (
+          <div className="border-t divide-y">
+            {THEMES.map(theme => {
+              const candidateChoice = candidate.proposals[theme.id];
+              const userChoice = answers[theme.id];
+              const matches = candidateChoice === userChoice;
+              const candidateOption = theme.options.find(o => o.id === candidateChoice);
+              const userOption = theme.options.find(o => o.id === userChoice);
+              return (
+                <div key={theme.id} className={`p-4 ${matches ? 'bg-green-50' : 'bg-red-50'}`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {matches
+                      ? <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                      : <XCircle className="h-5 w-5 text-red-500 shrink-0" />}
+                    <span className="font-bold text-lg uppercase tracking-wide">{theme.title}</span>
+                  </div>
+                  <div className="space-y-1 pl-7">
+                    <p className="text-base"><span className="font-semibold">Você:</span> {userOption?.text}</p>
+                    <p className="text-base"><span className="font-semibold">{candidate.name.split(' ')[0]}:</span> {candidateOption?.text}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Match() {
   const [started, setStarted] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(0);
@@ -127,29 +188,11 @@ export default function Match() {
           <p className="text-xl text-muted-foreground">Veja a compatibilidade com suas respostas.</p>
         </div>
 
+        <p className="text-lg text-muted-foreground text-center -mt-2">Toque em cada candidato para ver as propostas por tema.</p>
+
         <div className="space-y-4">
-          {results.map((c, i) => (
-            <Card key={c.name} className="overflow-hidden border-2 border-border shadow-sm">
-              <CardContent className="p-0">
-                <div className="flex items-center p-4 gap-4 bg-muted/30">
-                  <div className="text-5xl bg-background p-2 rounded-xl shadow-sm">{c.photo}</div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold">{c.name}</h3>
-                    <p className="text-lg text-muted-foreground">{c.party}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-3xl font-extrabold text-primary">{c.match}%</span>
-                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Match</p>
-                  </div>
-                </div>
-                <div className="h-4 w-full bg-muted">
-                  <div 
-                    className="h-full bg-primary transition-all duration-1000 ease-out"
-                    style={{ width: `${c.match}%` }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+          {results.map((c) => (
+            <CandidateProposalDetail key={c.name} candidate={c} answers={answers} />
           ))}
         </div>
         
