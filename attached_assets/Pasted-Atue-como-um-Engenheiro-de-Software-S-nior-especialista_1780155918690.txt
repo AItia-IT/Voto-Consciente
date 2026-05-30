@@ -1,0 +1,34 @@
+Atue como um Engenheiro de Software Sênior especialista em TypeScript, Express, Drizzle ORM e React 19. Precisamos implementar a funcionalidade core do nosso projeto "Voto Consciente": o cruzamento de Promessas de Campanha (Dados do TSE) com Realizações Práticas/Projetos de Lei (Dados da Câmara dos Deputados e Câmara Municipal de São Paulo).
+
+Siga rigorosamente a estrutura atual do nosso monorepo para implementar as seguintes tarefas:
+
+1. ATUALIZAÇÃO DO BANCO DE DADOS (Drizzle ORM & drizzle-zod)
+- No arquivo de schema do banco de dados, crie/atualize as seguintes tabelas e seus relacionamentos:
+  * 'politicos': id, nome_urna, partido, cargo, esfera ('federal' ou 'municipal'), localidade (ex: 'Brasil' ou 'São Paulo'), url_foto.
+  * 'promessas': id, politico_id (FK), categoria (ex: 'Saúde', 'Educação'), descricao_promessa (texto longo).
+  * 'realizacoes': id, politico_id (FK), titulo_projeto (ex: 'PL 1234/2023'), ementa (resumo do projeto), status ('Aprovado', 'Em tramitação', 'Arquivado'), link_oficial.
+- Execute as migrações necessárias para atualizar o banco PostgreSQL e regenere os schemas do Zod usando o drizzle-zod.
+
+2. ATUALIZAÇÃO DO CONTRATO DA API (OpenAPI YAML & Orval)
+- No arquivo de especificação em 'lib/api-spec/', adicione os seguintes endpoints:
+  * GET `/api/politicos` -> Retorna a lista de políticos filtrada por esfera ou localidade.
+  * GET `/api/politicos/{id}` -> Retorna os dados completos do político, incluindo suas listas de 'promessas' e 'realizacoes'.
+- Execute o comando do Orval para regenerar automaticamente os hooks do React Query e os schemas Zod no Frontend.
+
+3. ROTAS E LOGICA NO API SERVER (artifacts/api-server/)
+- Implemente os controllers das novas rotas no Express 5 respeitando o contrato OpenAPI criado.
+- Crie um script ou endpoint de seed/sincronização (`/api/admin/sync`) que faça requisições de teste (fetch) para as APIs reais:
+  * Federal: `https://dadosabertos.camara.leg.br/api/v2/deputados?ordem=ASC&ordenarBy=nome`
+  * Insira no banco dados reais de exemplo (ex: 3 deputados federais e o prefeito atual de SP), populando suas tabelas de promessas e projetos de lei (use dados estáticos realistas como fallback caso a API falhe ou demore).
+
+4. ENRIQUECIMENTO DA PERSONA "SÔNIA" (OpenAI via Proxy Replit + SSE)
+- Atualize o prompt de sistema (System Prompt) da persona "Sônia" no backend. 
+- Quando o usuário interagir no chat sobre um político específico, a Sônia deve fazer uma query no banco de dados (via Drizzle), buscar as promessas e realizações daquele político, e gerar um resumo analítico via streaming (SSE). Ela deve dizer de forma crítica e apartidária se os projetos de lei dele estão alinhados com o que ele prometeu.
+
+5. FRONTEND (artifacts/voto-consciente/)
+- Na página de perfil do político (`/app/politico/[id]` ou equivalente no roteamento do Wouter), utilize os hooks gerados pelo Orval/React Query para exibir as informações.
+- Crie uma interface limpa usando Tailwind CSS e componentes do shadcn/ui (use Tabs: uma aba para "Plano de Governo / Promessas" e outra para "Projetos de Lei / Realizações").
+- Adicione badges coloridos para o status dos projetos (Verde para Aprovado, Laranja para Tramitando).
+- Integre com o sistema de gamificação atual em localStorage: quando o usuário terminar de ler o comparativo de promessas de um político, dispare uma ação que conceda XP e atualize as missões do usuário.
+
+Por favor, execute essas alterações passo a passo, garantindo que o build do monorepo (pnpm workspaces) continue passando sem erros de TypeScript ou de validação do Zod.

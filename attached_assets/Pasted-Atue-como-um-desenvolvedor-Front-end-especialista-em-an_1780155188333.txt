@@ -1,0 +1,56 @@
+Atue como um desenvolvedor Front-end especialista em animações interativas e acessibilidade. Crie um componente de animação explicativa passo a passo (estilo "Tour Interativo" ou "Onboarding") para introduzir a plataforma "Voto Consciente" para usuários idosos. 
+
+
+### 1. Estilo Visual e Animação
+
+- Utilize a biblioteca GSAP (via CDN) ou CSS Animations para criar transições suaves, lentas e fáceis de acompanhar, evitando qualquer efeito visual brusco que possa confundir o usuário.
+
+- O elemento central da animação será a mascote oficial (baseada na imagem  uma simpática senhora de óculos redondos e casaco bege, acenando com a mão de 5 dedos).
+
+- A animação deve simular a mascote "andando" ou deslizando suavemente pela tela e apontando com efeitos visuais sutis (como um brilho ou setas pulsantes) para os elementos da interface.
+
+
+### 2. Fluxo da Animação Passo a Passo (O Tour)
+
+Crie um modal ou overlay semitransparente sobre a interface que guie o usuário pelas principais funções através de 4 etapas controladas por botões grandes "[Voltar]" e "[Avançar]":
+
+
+- **Passo 1: Boas-vindas e Propósito**
+
+  * A mascote aparece ampliada no centro da tela com uma animação suave de balanço (hover leve).
+
+  * Um balão de fala grande diz: "Olá! Eu sou sua guia. Vou te mostrar como nosso espaço funciona. É muito simples e seguro!"
+
+  * Ative a Web Speech API para ler este balão de fala com voz feminina em português ("pt-BR") em velocidade reduzida (0.85).
+
+
+- **Passo 2: Explicando as Missões (Baseado em 'Screenshot from 2026-05-30 11-24-36_2.jpg')**
+
+  * A mascote encolhe e desliza suavemente para o lado da seção "Academia da Democracia".
+
+  * O fundo da tela escurece um pouco, exceto a área da "Missão 1". A mascote aponta para ela.
+
+  * O balão de fala diz: "Aqui na Academia, nós fazemos uma missão por vez. Cada quadradinho desse ensina algo sobre os seus direitos. Quando você termina um, o próximo cadeado se abre!"
+
+
+- **Passo 3: Como funciona o Fake ou Fato?**
+
+  * A tela simula visualmente o clique no menu "Fake ou Fato?". Uma manchete de exemplo surge com uma animação de surgimento gradual (fade-in).
+
+  * A mascote se posiciona entre os botões gigantes "✅ Fato" e "❌ Fake" e diz: "Aqui nós jogamos para descobrir o que é verdade na internet. Não se preocupe em errar, o importante é aprendermos a verificar juntos!"
+
+
+- **Passo 4: Autonomia no Match de Candidatos**
+
+  * O tour destaca visualmente a aba "Match".
+
+  * A mascote aparece com uma expressão sorridente e um balão que diz: "Na ferramenta de propostas, você escolhe o que é mais importante para o seu bairro, como Saúde ou Segurança. O site mostra quem pensa parecido com você, mas o voto é sempre seu!"
+
+
+### 3. Controles de Acessibilidade da Animação
+
+- **Ritmo do Usuário:** A animação NUNCA deve avançar sozinha por tempo. O idoso deve ter controle total através dos botões "[Avançar Passo]" e um botão permanente "[Pular Explicação]" no topo.
+
+- **Tamanho dos Textos:** Todos os balões de diálogo da animação devem ter letras grandes (mínimo de 20px) com alto contraste.
+
+- **Áudio Sincronizado:** Toda vez que o usuário avançar para o próximo passo, a animação de movimento da mascote acontece primeiro e, ao parar, o áudio da Web Speech API começa a ler o texto automaticamente.

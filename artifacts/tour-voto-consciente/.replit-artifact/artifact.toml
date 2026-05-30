@@ -1,0 +1,31 @@
+kind = "video"
+previewPath = "/tour-voto-consciente/"
+title = "Tour Voto Consciente"
+version = "1.0.0"
+id = "artifacts/tour-voto-consciente"
+router = "path"
+
+[[integratedSkills]]
+name = "video-js"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/tour-voto-consciente/" ]
+localPort = 21337
+
+[services.development]
+run = "pnpm --filter @workspace/tour-voto-consciente run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tour-voto-consciente", "run", "build" ]
+publicDir = "artifacts/tour-voto-consciente/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21337"
+BASE_PATH = "/tour-voto-consciente/"
