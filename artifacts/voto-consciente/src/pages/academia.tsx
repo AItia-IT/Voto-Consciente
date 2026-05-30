@@ -1,217 +1,424 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { SpeakerButton } from "@/components/speaker-button";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
-import { addXP, completeMission, getMissionsCompleted } from "@/lib/progress";
-import { CheckCircle2, Lock } from "lucide-react";
+import { addXP, completeMission } from "@/lib/progress";
+import { RefreshCw, ChevronRight, Star } from "lucide-react";
 import mascoteImg from "@/assets/mascote.png";
 
-type MissionCard = { text: string };
-type Mission = { id: number; title: string; subtitle: string; xp: number; cards: MissionCard[] };
-
-const MISSIONS: Mission[] = [
-  {
-    id: 1, title: "Quem cria as leis?", subtitle: "O papel do Congresso Nacional", xp: 120,
-    cards: [
-      { text: "O Brasil tem 3 poderes separados para que nenhum tenha poder demais: Executivo, Legislativo e Judiciário." },
-      { text: "EXECUTIVO: Governa o país, o estado ou o município. Presidente, governadores e prefeitos fazem parte deste poder." },
-      { text: "LEGISLATIVO: Cria as leis. Inclui o Congresso (Câmara + Senado), as Assembleias estaduais e as Câmaras municipais." },
-      { text: "JUDICIÁRIO: Interpreta e aplica as leis. Garante que todos sejam tratados com justiça, incluindo o governo." }
-    ]
-  },
-  {
-    id: 2, title: "Quem fiscaliza o governo?", subtitle: "Controle e fiscalização democrática", xp: 100,
-    cards: [
-      { text: "O Poder Judiciário garante que as leis sejam cumpridas por todos, inclusive pelos governantes." },
-      { text: "O Tribunal de Contas da União (TCU) fiscaliza como o dinheiro público é gasto." },
-      { text: "O Ministério Público atua para defender os direitos da sociedade e pode processar políticos por corrupção." },
-      { text: "Mas a principal fiscalização vem de você! O cidadão pode e deve cobrar seus representantes." }
-    ]
-  },
-  {
-    id: 3, title: "Como funciona uma eleição?", subtitle: "Do cadastro à apuração", xp: 110,
-    cards: [
-      { text: "O Brasil usa urnas eletrônicas desde 1996. São seguras e contam os votos automaticamente." },
-      { text: "Você vota digitando o número do candidato na urna. O número é único para cada candidato e cargo." },
-      { text: "Para prefeito e presidente, se nenhum candidato passar de 50% dos votos, há um segundo turno." },
-      { text: "Vereadores e deputados são eleitos por votos — quem tem mais votos vence. Não tem segundo turno." }
-    ]
-  },
-  {
-    id: 4, title: "Quais são os seus direitos?", subtitle: "Direitos do cidadão brasileiro", xp: 130,
-    cards: [
-      { text: "DIREITO AO VOTO: Todo brasileiro entre 18 e 70 anos é obrigado a votar. Jovens de 16-17 e maiores de 70 podem votar se quiserem." },
-      { text: "DIREITO À INFORMAÇÃO: Você tem direito de pedir informações sobre o que o governo faz com o seu dinheiro." },
-      { text: "DEVER DE DENUNCIAR: Se você souber de corrupção, pode denunciar ao Ministério Público ou à Polícia Federal." },
-      { text: "Participar da democracia não é só votar — é também acompanhar o que os eleitos fazem depois." }
-    ]
-  },
-  {
-    id: 5, title: "Como identificar fake news?", subtitle: "Ferramentas de verificação", xp: 150,
-    cards: [
-      { text: "Sempre desconfie de mensagens que pedem para você 'compartilhar urgente' ou que causam muita raiva." },
-      { text: "Verifique a fonte: a notícia foi publicada em sites de jornalismo conhecidos?" },
-      { text: "Procure no Google o título da notícia junto com a palavra 'fake'. Provavelmente alguém já checou." },
-      { text: "Agências como Lupa, Aos Fatos e Fato ou Fake são especializadas em desmentir mentiras na internet." }
-    ]
-  }
+// ── Banco de termos cívicos (24 termos + FREE central) ──────────────────────
+const TERMS: { term: string; definition: string }[] = [
+  { term: "Poder Executivo",     definition: "Governa o país. Inclui o Presidente, governadores e prefeitos." },
+  { term: "Poder Legislativo",   definition: "Cria as leis. Congresso Nacional, Assembleias estaduais e Câmaras municipais." },
+  { term: "Poder Judiciário",    definition: "Interpreta e aplica as leis. Garante que todos sejam tratados com justiça." },
+  { term: "TCU",                 definition: "Tribunal de Contas da União. Fiscaliza como o dinheiro público é gasto." },
+  { term: "Ministério Público",  definition: "Defende os direitos da sociedade e pode processar políticos por corrupção." },
+  { term: "Urna Eletrônica",     definition: "Usada no Brasil desde 1996. Conta os votos automaticamente e é segura." },
+  { term: "Segundo Turno",       definition: "Acontece quando nenhum candidato atinge mais de 50% dos votos válidos." },
+  { term: "Vereador",            definition: "Eleito por votos para a Câmara Municipal. Cria leis locais e fiscaliza o prefeito." },
+  { term: "Fake News",           definition: "Notícia falsa criada para enganar. Desconfie de mensagens 'compartilhe urgente'." },
+  { term: "Agência de Checagem", definition: "Site especializado em verificar se notícias são verdadeiras. Ex: Lupa, Aos Fatos." },
+  { term: "Deputado Federal",    definition: "Representa o povo na Câmara dos Deputados em Brasília." },
+  { term: "Senador",             definition: "Representa o estado no Senado Federal. Cada estado elege 3 senadores." },
+  { term: "Presidente",          definition: "Chefe do Poder Executivo Federal. Eleito de 4 em 4 anos com segundo turno." },
+  { term: "Voto Obrigatório",    definition: "Todo brasileiro entre 18 e 70 anos é obrigado a votar nas eleições." },
+  { term: "Voto Facultativo",    definition: "Jovens de 16-17 anos e maiores de 70 podem votar se quiserem, sem obrigação." },
+  { term: "Congresso Nacional",  definition: "Formado pela Câmara dos Deputados e pelo Senado Federal." },
+  { term: "Constituição",        definition: "Lei maior do Brasil. Define os direitos dos cidadãos e os limites do governo." },
+  { term: "Mandato",             definition: "Período de tempo que um político eleito fica no cargo." },
+  { term: "Cidadania",           definition: "Conjunto de direitos e deveres que cada pessoa tem em uma democracia." },
+  { term: "Democracia",          definition: "Sistema de governo onde o poder vem do povo, por meio de eleições livres." },
+  { term: "Lei de Acesso",       definition: "Direito do cidadão de pedir informações sobre o que o governo faz com dinheiro público." },
+  { term: "Polícia Federal",     definition: "Órgão que investiga crimes federais, como corrupção e tráfico internacional." },
+  { term: "Eleitorado",          definition: "Conjunto de todos os cidadãos com direito de votar em um lugar." },
+  { term: "Fiscalizar",          definition: "Dever de acompanhar o que os políticos eleitos fazem depois do voto." },
 ];
 
+// ── Utilitários ──────────────────────────────────────────────────────────────
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Índices das 5 linhas, 5 colunas e 2 diagonais de uma grade 5×5
+const BINGO_LINES: number[][] = [
+  [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24], // linhas
+  [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], // colunas
+  [0,6,12,18,24], [4,8,12,16,20],                                                   // diagonais
+];
+
+function buildGrid(): Array<{ term: string; definition: string } | null> {
+  const picked = shuffle(TERMS).slice(0, 24);
+  const grid: Array<{ term: string; definition: string } | null> = [...picked];
+  grid.splice(12, 0, null); // FREE no centro (índice 12)
+  return grid;
+}
+
+// ── Confetti simples ─────────────────────────────────────────────────────────
+function Confetti() {
+  const pieces = Array.from({ length: 28 }, (_, i) => ({
+    id: i,
+    color: ["#F59E0B","#1a2744","#22C55E","#EF4444","#3B82F6","#A855F7"][i % 6],
+    left: `${Math.random() * 100}%`,
+    delay: Math.random() * 0.5,
+    duration: 1.2 + Math.random() * 0.8,
+  }));
+  return (
+    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+      {pieces.map(p => (
+        <motion.div
+          key={p.id}
+          className="absolute top-0 w-3 h-3 rounded-sm"
+          style={{ left: p.left, background: p.color }}
+          initial={{ y: -20, rotate: 0, opacity: 1 }}
+          animate={{ y: "105vh", rotate: 720, opacity: 0 }}
+          transition={{ duration: p.duration, delay: p.delay, ease: "easeIn" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Componente principal ─────────────────────────────────────────────────────
 export default function Academia() {
-  const [completed, setCompleted] = useState<number[]>([]);
-  const [activeMission, setActiveMission] = useState<Mission | null>(null);
-  const [currentCard, setCurrentCard] = useState(0);
+  const [grid, setGrid] = useState<Array<{ term: string; definition: string } | null>>(() => buildGrid());
+  const [callOrder, setCallOrder] = useState<number[]>(() => shuffle([...Array(24).keys()])); // índices 0-23 do TERMS original
+  const [callIdx, setCallIdx] = useState(0);
+  const [marked, setMarked] = useState<Set<number>>(() => new Set([12])); // FREE marcado
+  const [newBingoLines, setNewBingoLines] = useState<number[][]>([]);
+  const [celebratedLines, setCelebratedLines] = useState<Set<string>>(new Set());
+  const [showBingo, setShowBingo] = useState(false);
+  const [bingoXP, setBingoXP] = useState(0);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [confetti, setConfetti] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
 
-  useEffect(() => {
-    setCompleted(getMissionsCompleted());
-  }, []);
+  // Definição que a Sônia está "cantando" agora
+  // callOrder[callIdx] é o índice no TERMS array; mas o grid tem a célula FREE no meio
+  // Precisamos pegar o termo do TERMS pelo callOrder
+  const currentTermIdx = callOrder[callIdx] as number; // índice em TERMS (0-23)
+  const currentEntry = TERMS[currentTermIdx];
 
-  const startMission = (mission: Mission) => {
-    setActiveMission(mission);
-    setCurrentCard(0);
+  // Mapeia termo → posição na grade (0-24), ignorando FREE (índice 12 = null)
+  const termToGridPos = useCallback(() => {
+    const map = new Map<string, number>();
+    grid.forEach((cell, pos) => {
+      if (cell) map.set(cell.term, pos);
+    });
+    return map;
+  }, [grid]);
+
+  const checkBingo = (markedSet: Set<number>) => {
+    const newLines: number[][] = [];
+    for (const line of BINGO_LINES) {
+      const key = line.join(",");
+      if (!celebratedLines.has(key) && line.every(i => markedSet.has(i))) {
+        newLines.push(line);
+      }
+    }
+    return newLines;
   };
 
-  const nextCard = () => {
-    if (activeMission && currentCard + 1 < activeMission.cards.length) {
-      setCurrentCard(c => c + 1);
-    } else if (activeMission) {
-      // Finish mission
-      completeMission(activeMission.id);
-      addXP(activeMission.xp);
-      const newCompleted = [...completed, activeMission.id];
-      setCompleted(newCompleted);
-      setActiveMission(null);
-      
-      // Check certificate
-      if (newCompleted.length >= MISSIONS.length) {
+  const handleCellClick = (gridPos: number) => {
+    if (marked.has(gridPos) || grid[gridPos] === null) return;
+
+    // Só marca se o termo foi chamado
+    const cell = grid[gridPos];
+    if (!cell) return;
+    const calledTerms = new Set(callOrder.slice(0, callIdx + 1).map(i => TERMS[i as number].term));
+    if (!calledTerms.has(cell.term)) return;
+
+    const newMarked = new Set(marked);
+    newMarked.add(gridPos);
+    setMarked(newMarked);
+
+    const justBingo = checkBingo(newMarked);
+    if (justBingo.length > 0) {
+      const xp = justBingo.length * 100;
+      setBingoXP(xp);
+      addXP(xp);
+      const newCelebrated = new Set(celebratedLines);
+      justBingo.forEach(l => newCelebrated.add(l.join(",")));
+      setCelebratedLines(newCelebrated);
+      setNewBingoLines(justBingo);
+      setShowBingo(true);
+      setConfetti(true);
+      setTimeout(() => setConfetti(false), 2200);
+    }
+
+    // Cartela completa
+    if (newMarked.size === 25) {
+      completeMission(99); // ID especial do bingo
+      addXP(300);
+      setTimeout(() => {
+        setGameOver(true);
         setShowCertificate(true);
-      }
+        setConfetti(true);
+      }, 700);
     }
   };
 
+  const nextCall = () => {
+    if (callIdx + 1 < 24) setCallIdx(c => c + 1);
+  };
+
+  const newGame = () => {
+    setGrid(buildGrid());
+    setCallOrder(shuffle([...Array(24).keys()]));
+    setCallIdx(0);
+    setMarked(new Set([12]));
+    setNewBingoLines([]);
+    setCelebratedLines(new Set());
+    setShowBingo(false);
+    setShowCertificate(false);
+    setGameOver(false);
+    setConfetti(false);
+  };
+
+  // Células destacadas (pertencendo a uma linha de bingo celebrada)
+  const highlightedCells = new Set<number>();
+  for (const line of BINGO_LINES) {
+    const key = line.join(",");
+    if (celebratedLines.has(key)) line.forEach(i => highlightedCells.add(i));
+  }
+
+  // Termos chamados até agora
+  const calledTerms = new Set(callOrder.slice(0, callIdx + 1).map(i => TERMS[i as number].term));
+  const termToPos = termToGridPos();
+
+  // ── Tela de certificado ────────────────────────────────────────────────────
   if (showCertificate) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-6">
-        <div className="bg-yellow-50 border-4 border-yellow-400 p-8 rounded-xl shadow-2xl relative overflow-hidden w-full max-w-md mx-auto">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200 rounded-bl-full -z-10 opacity-50" />
-          <div className="text-7xl mb-6">🎓</div>
-          <h1 className="text-3xl font-extrabold text-yellow-800 mb-2">CERTIFICADO</h1>
-          <h2 className="text-2xl font-bold text-yellow-900 mb-6">Cidadão Democrata</h2>
-          <p className="text-xl text-yellow-700 font-medium">Você completou todas as missões da Academia da Democracia e está pronto para votar com consciência!</p>
-        </div>
-        <Button onClick={() => setShowCertificate(false)} className="w-full max-w-md h-16 text-2xl shadow-md">
-          Voltar para Academia
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-6 px-4">
+        {confetti && <Confetti />}
+        <motion.div
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", bounce: 0.4 }}
+          className="border-4 border-yellow-400 p-8 rounded-3xl shadow-2xl w-full max-w-md"
+          style={{ background: "linear-gradient(135deg,#FFFBEB,#FEF3C7)" }}
+        >
+          <div className="text-7xl mb-4">🎓</div>
+          <h1 className="text-3xl font-extrabold text-yellow-800 mb-1">BINGO COMPLETO!</h1>
+          <h2 className="text-2xl font-bold text-yellow-900 mb-4">Cidadão Democrata</h2>
+          <p className="text-lg text-yellow-700 font-medium leading-relaxed">
+            Você marcou toda a cartela e ganhou <strong>+300 XP</strong>!<br />
+            Sua democracia agradece. 🗳️
+          </p>
+        </motion.div>
+        <Button onClick={newGame} className="w-full max-w-md h-14 text-xl font-bold rounded-full shadow-md" style={{ background: "#1a2744" }}>
+          <RefreshCw className="h-5 w-5 mr-2" /> Jogar Novamente
         </Button>
       </div>
     );
   }
 
-  if (activeMission) {
-    const card = activeMission.cards[currentCard];
-    return (
-      <div className="flex flex-col min-h-[70vh] py-4 max-w-2xl mx-auto">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2 text-foreground">
-            {activeMission.title}
-          </h2>
-          <div className="w-full bg-muted rounded-full h-3">
-            <div className="bg-primary h-3 rounded-full transition-all duration-300" style={{ width: `${((currentCard) / activeMission.cards.length) * 100}%` }} />
+  // ── Jogo ───────────────────────────────────────────────────────────────────
+  return (
+    <div className="pb-8">
+      {confetti && <Confetti />}
+
+      {/* Modal BINGO */}
+      <AnimatePresence>
+        {showBingo && (
+          <motion.div
+            className="fixed inset-0 z-40 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setShowBingo(false)}
+          >
+            <div className="absolute inset-0 bg-black/40" />
+            <motion.div
+              className="relative z-10 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full"
+              style={{ background: "#FEF3C7", border: "4px solid #F59E0B" }}
+              initial={{ scale: 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", bounce: 0.5 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="text-6xl mb-3">🎉</div>
+              <h2 className="text-4xl font-black mb-2" style={{ color: "#1a2744" }}>BINGO!</h2>
+              <p className="text-xl font-semibold mb-4" style={{ color: "#92400E" }}>
+                Você ganhou <strong>+{bingoXP} XP</strong>!
+              </p>
+              <Button onClick={() => setShowBingo(false)} className="w-full h-12 text-lg font-bold rounded-full" style={{ background: "#1a2744" }}>
+                Continuar jogando
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-2xl font-extrabold" style={{ color: "#1a2744" }}>🎱 Bingo Cívico</h1>
+          <p className="text-sm mt-0.5" style={{ color: "#6B7280" }}>Academia da Democracia</p>
+        </div>
+        <Button variant="outline" onClick={newGame} className="rounded-full gap-2 font-semibold border-2" style={{ borderColor: "#1a2744", color: "#1a2744" }}>
+          <RefreshCw className="h-4 w-4" /> Nova Cartela
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
+        {/* ── Cartela 5×5 ── */}
+        <div>
+          {/* Header BINGO */}
+          <div className="grid grid-cols-5 gap-1 mb-1">
+            {["B","I","N","G","O"].map(l => (
+              <div key={l} className="h-9 flex items-center justify-center font-black text-xl rounded-lg" style={{ background: "#1a2744", color: "#F59E0B" }}>
+                {l}
+              </div>
+            ))}
+          </div>
+
+          {/* Células */}
+          <div className="grid grid-cols-5 gap-1">
+            {grid.map((cell, pos) => {
+              const isFree = cell === null;
+              const isMarked = marked.has(pos);
+              const isHighlighted = highlightedCells.has(pos);
+              const isCallable = cell && calledTerms.has(cell.term);
+              const isClickable = cell && isCallable && !isMarked;
+
+              return (
+                <motion.button
+                  key={pos}
+                  onClick={() => handleCellClick(pos)}
+                  disabled={!isClickable}
+                  whileHover={isClickable ? { scale: 1.04 } : {}}
+                  whileTap={isClickable ? { scale: 0.96 } : {}}
+                  className="relative flex items-center justify-center rounded-lg text-center font-bold transition-all"
+                  style={{
+                    aspectRatio: "1",
+                    fontSize: "clamp(8px, 1.3vw, 13px)",
+                    lineHeight: 1.2,
+                    padding: "4px",
+                    cursor: isClickable ? "pointer" : "default",
+                    background: isFree
+                      ? "#1a2744"
+                      : isHighlighted
+                      ? "#FDE68A"
+                      : isMarked
+                      ? "#F59E0B"
+                      : isCallable
+                      ? "#FEF9EC"
+                      : "#F3F4F6",
+                    border: isHighlighted
+                      ? "2px solid #F59E0B"
+                      : isMarked
+                      ? "2px solid #D97706"
+                      : isCallable
+                      ? "2px solid #F59E0B"
+                      : "2px solid #E5E7EB",
+                    color: isFree
+                      ? "#F59E0B"
+                      : isMarked || isHighlighted
+                      ? "#1a2744"
+                      : isCallable
+                      ? "#1a2744"
+                      : "#9CA3AF",
+                  }}
+                >
+                  {isFree ? (
+                    <img src={mascoteImg} alt="FREE" className="h-10 w-10 rounded-full object-cover" />
+                  ) : isMarked ? (
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-base">✓</span>
+                      <span style={{ fontSize: "clamp(7px, 1.1vw, 11px)" }}>{cell!.term}</span>
+                    </div>
+                  ) : (
+                    <span className="px-0.5">{cell!.term}</span>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Legenda */}
+          <div className="flex flex-wrap gap-3 mt-3 text-xs font-semibold">
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded inline-block" style={{background:"#F59E0B",border:"2px solid #D97706"}} /> Marcado</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded inline-block" style={{background:"#FEF9EC",border:"2px solid #F59E0B"}} /> Chamado — toque para marcar</span>
+            <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded inline-block" style={{background:"#FDE68A",border:"2px solid #F59E0B"}} /> Bingo!</span>
           </div>
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={currentCard}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex-1 flex flex-col"
+        {/* ── Painel da Sônia ── */}
+        <div className="flex flex-col gap-4">
+          {/* Card da definição atual */}
+          <motion.div
+            key={callIdx}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-3xl p-5 shadow-lg"
+            style={{ background: "linear-gradient(135deg,#FEF9EC,#FDE8CC)", border: "2px solid #F59E0B" }}
           >
-            <Card className="mb-8 flex-1 flex flex-col justify-center border-2 border-primary/20 bg-white">
-              <CardContent className="p-8 text-center relative pt-16">
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-white border-2 p-2 rounded-full shadow-sm">
-                  <SpeakerButton text={card.text} className="h-10 w-10 border-0" />
-                </div>
-                <p className="text-3xl font-medium leading-relaxed text-foreground">
-                  {card.text}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Button onClick={nextCard} className="w-full h-16 text-2xl shadow-md font-bold mt-auto" data-testid="button-next-card">
-              {currentCard + 1 === activeMission.cards.length ? "Concluir Missão 🎉" : "Próximo"}
-            </Button>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    );
-  }
-
-  const welcomeMessage = "Faça uma missão por vez. Cada uma leva poucos minutos e te dá XP no seu painel.";
-
-  return (
-    <div className="space-y-8 pb-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl p-6 shadow-sm border border-border flex flex-row items-center text-left relative overflow-hidden gap-4"
-        style={{ background: 'linear-gradient(to right, #FFF3C4, #FFE4B0)' }}
-      >
-        <img src={mascoteImg} alt="Sônia" className="h-20 w-20 md:h-24 md:w-24 rounded-full object-cover border-4 border-white shadow-md shrink-0" />
-        <div className="flex-1 relative">
-            <p className="text-lg md:text-xl leading-relaxed text-foreground font-medium">"{welcomeMessage}"</p>
-        </div>
-      </motion.div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {MISSIONS.map((mission, idx) => {
-          const isCompleted = completed.includes(mission.id);
-          const isNext = !isCompleted && (idx === 0 || completed.includes(MISSIONS[idx - 1].id));
-          const isLocked = !isCompleted && !isNext;
-
-          return (
-            <div key={mission.id} className="relative">
-              <Card className={`overflow-hidden transition-all h-full ${isNext ? 'ring-2 ring-primary ring-offset-2 ring-offset-background shadow-md cursor-pointer bg-white' : isLocked ? 'opacity-80 bg-muted/50 cursor-not-allowed' : 'bg-white cursor-pointer'}`}
-                onClick={() => {
-                    if(!isLocked && !isCompleted) startMission(mission);
-                }}
-              >
-                <CardContent className="p-6 flex flex-col h-full gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl
-                        ${isCompleted ? 'bg-green-100 text-green-600' : isNext ? 'bg-[#F5A623] text-white' : 'bg-gray-300 text-gray-500'}
-                    `}>
-                        {isCompleted ? <CheckCircle2 className="h-7 w-7" /> : 
-                         isLocked ? <Lock className="h-6 w-6" /> :
-                         mission.id}
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="font-bold text-xl text-foreground mb-1">{mission.title}</h3>
-                        <p className="text-sm text-muted-foreground">{mission.subtitle}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-auto pt-4 flex items-center justify-between border-t border-border">
-                    <span className="text-sm font-bold text-secondary-foreground bg-secondary/30 px-3 py-1 rounded-full">
-                        +{mission.xp} XP
-                    </span>
-                    {!isLocked && !isCompleted && (
-                        <span className="text-sm font-bold text-primary">Toque para começar</span>
-                    )}
-                    {isLocked && (
-                        <span className="text-sm font-bold text-muted-foreground">Conclua a anterior</span>
-                    )}
-                     {isCompleted && (
-                        <span className="text-sm font-bold text-green-600">Concluída</span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="flex items-center gap-3 mb-3">
+              <img src={mascoteImg} alt="Sônia" className="h-14 w-14 rounded-full object-cover border-3 border-white shadow" />
+              <div>
+                <div className="font-bold text-sm" style={{ color: "#1a2744" }}>Sônia está chamando…</div>
+                <div className="text-xs" style={{ color: "#6B7280" }}>Chamada {callIdx + 1} de 24</div>
+              </div>
             </div>
-          );
-        })}
+
+            <p className="text-base font-medium leading-relaxed mb-3" style={{ color: "#1a2744", minHeight: 60 }}>
+              "{currentEntry.definition}"
+            </p>
+
+            <div className="flex items-center gap-2">
+              <SpeakerButton text={currentEntry.definition} className="h-10 w-10 border-2 shrink-0" />
+              <Button
+                onClick={nextCall}
+                disabled={callIdx + 1 >= 24 || gameOver}
+                className="flex-1 h-10 font-bold rounded-full gap-1"
+                style={{ background: "#1a2744", color: "#fff" }}
+              >
+                Próxima <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Histórico de chamadas */}
+          <div className="rounded-2xl p-4 flex flex-col gap-2" style={{ background: "#F9FAFB", border: "1.5px solid #E5E7EB" }}>
+            <div className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color: "#6B7280" }}>
+              Termos já chamados ({callIdx + 1})
+            </div>
+            <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+              {callOrder.slice(0, callIdx + 1).map((tIdx, i) => {
+                const t = TERMS[tIdx as number];
+                const gridPos = termToPos.get(t.term);
+                const isMarkedOnGrid = gridPos !== undefined && marked.has(gridPos);
+                return (
+                  <span
+                    key={i}
+                    className="px-2 py-0.5 rounded-full text-xs font-semibold"
+                    style={{
+                      background: isMarkedOnGrid ? "#F59E0B" : "#E5E7EB",
+                      color: isMarkedOnGrid ? "#fff" : "#374151",
+                    }}
+                  >
+                    {isMarkedOnGrid && <Star className="h-2.5 w-2.5 inline mb-0.5 mr-0.5" />}
+                    {t.term}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Bingos conquistados */}
+          {celebratedLines.size > 0 && (
+            <div className="rounded-2xl p-4" style={{ background: "#FFFBEB", border: "2px solid #F59E0B" }}>
+              <div className="font-bold text-sm mb-1" style={{ color: "#92400E" }}>
+                🏆 Bingos: {celebratedLines.size}
+              </div>
+              <div className="text-xs" style={{ color: "#B45309" }}>
+                +{celebratedLines.size * 100} XP conquistados!
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
