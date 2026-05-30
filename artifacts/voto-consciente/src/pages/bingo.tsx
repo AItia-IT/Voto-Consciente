@@ -272,7 +272,7 @@ export default function Bingo() {
                 border: `2px solid ${isBingo ? "#D97706" : isMarked ? "#059669" : "#E5E7EB"}`,
                 cursor: isMarked ? "default" : "pointer",
                 boxShadow: isBingo ? "0 0 0 3px #FDE68A" : undefined,
-                fontSize: "clamp(10px, 2.5vw, 13px)",
+                fontSize: "clamp(10px, 2.5vw, 25px)",
               }}
             >
               {isMarked ? (
