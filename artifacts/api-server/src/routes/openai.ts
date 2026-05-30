@@ -204,25 +204,23 @@ router.post("/conversations/:id/messages", async (req, res) => {
 
 // ── TTS helper ───────────────────────────────────────────────────────────────
 async function textToSpeechForSeniors(text: string): Promise<Buffer> {
-const response = await openai.chat.completions.create({
-    model: "gpt-4o-audio-preview", // Ou o modelo de áudio específico que você está utilizando
+  const response = await openai.chat.completions.create({
+    model: "gpt-audio",
     modalities: ["text", "audio"],
     audio: { voice: "shimmer", format: "mp3" },
-    temperature: 0.0, // <- Zera a criatividade do modelo
-    top_p: 0.0,       // <- Garante precisão máxima na escolha das palavras
+    temperature: 0.0,
     messages: [
       {
         role: "system",
         content:
-          "Você é uma locutora brasileira calorosa, paciente e acolhedora. " +
-          "Fale de forma clara, sem introduções. " +
-          "Use um tom de voz suave, gentil e velocidade normal. " +
-          "REGRA ABSOLUTA: Reproduza APENAS o texto fornecido pelo usuário dentro das tags <texto>. " +
-          "Não ignore, não mude, não comente e não acrescente NENHUMA palavra (nem mesmo saudações).",
+          "You are a text-to-speech engine. " +
+          "Read the user's text at a natural, conversational pace — not slow, not dramatic. " +
+          "Do NOT add any words, greetings, comments, or pauses that are not in the text. " +
+          "Start speaking the text immediately with zero preamble.",
       },
       {
         role: "user",
-        content: `<texto>\n${text}\n</texto>`, // <- Isola o conteúdo para o modelo não se confundir
+        content: text,
       },
     ],
   });
