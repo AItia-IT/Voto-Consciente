@@ -51,11 +51,35 @@ const THEMES: Theme[] = [
   ]}
 ];
 
+// Posicionamento de cada candidato nos 7 temas do questionário
+// saude:  A=público  B=privado     C=digital
+// educacao: A=público B=vouchers   C=técnico
+// seguranca: A=policial B=tecnologia C=social
+// transporte: A=gratuito B=ciclovias C=aplicativo
+// economia: A=impostos B=estatais   C=pequenos negócios
+// ambiente: A=fiscalização B=renovável C=equilíbrio
+// inclusao: A=transferência B=capacitação C=habitação
 const CANDIDATE_PROPOSALS: Record<string, Record<string, 'A'|'B'|'C'>> = {
-  "TABATA AMARAL":  { saude:'A', educacao:'A', seguranca:'C', transporte:'B', economia:'C', ambiente:'B', inclusao:'A' },
-  "GUILHERME BOULOS": { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'A' },
-  "KIM KATAGUIRI":  { saude:'C', educacao:'C', seguranca:'A', transporte:'C', economia:'A', ambiente:'C', inclusao:'B' },
-  "SÂMIA BOMFIM":   { saude:'A', educacao:'A', seguranca:'C', transporte:'B', economia:'B', ambiente:'A', inclusao:'A' },
+  "TABATA AMARAL":       { saude:'A', educacao:'A', seguranca:'C', transporte:'B', economia:'C', ambiente:'B', inclusao:'A' },
+  "GUILHERME BOULOS":    { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'C' },
+  "KIM KATAGUIRI":       { saude:'C', educacao:'C', seguranca:'A', transporte:'C', economia:'A', ambiente:'C', inclusao:'B' },
+  "SÂMIA BOMFIM":        { saude:'A', educacao:'A', seguranca:'C', transporte:'B', economia:'B', ambiente:'A', inclusao:'A' },
+  "NIKOLAS FERREIRA":    { saude:'B', educacao:'B', seguranca:'A', transporte:'C', economia:'A', ambiente:'C', inclusao:'C' },
+  "DUDA SALABERT":       { saude:'A', educacao:'C', seguranca:'C', transporte:'B', economia:'C', ambiente:'B', inclusao:'B' },
+  "MARIA DO ROSÁRIO":    { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'A' },
+  "GLEISI HOFFMANN":     { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'A' },
+  "ERIKA KOKAY":         { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'C' },
+  "GLAUBER BRAGA":       { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'A' },
+  "NATÁLIA BONAVIDES":   { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'B', inclusao:'B' },
+  "REGINALDO LOPES":     { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'A' },
+  "CAPITÃO ALBERTO NETO":{ saude:'B', educacao:'C', seguranca:'A', transporte:'C', economia:'A', ambiente:'C', inclusao:'B' },
+  "CORONEL MEIRA":       { saude:'B', educacao:'B', seguranca:'A', transporte:'C', economia:'A', ambiente:'C', inclusao:'C' },
+  "CAROLINE DE TONI":    { saude:'B', educacao:'B', seguranca:'A', transporte:'C', economia:'A', ambiente:'C', inclusao:'C' },
+  "RODRIGO AGOSTINHO":   { saude:'A', educacao:'C', seguranca:'B', transporte:'B', economia:'C', ambiente:'B', inclusao:'B' },
+  "IVAN VALENTE":        { saude:'A', educacao:'A', seguranca:'C', transporte:'A', economia:'B', ambiente:'A', inclusao:'A' },
+  "CELSO SABINO":        { saude:'C', educacao:'C', seguranca:'B', transporte:'C', economia:'C', ambiente:'C', inclusao:'B' },
+  "PEDRO PAULO":         { saude:'C', educacao:'C', seguranca:'B', transporte:'C', economia:'C', ambiente:'C', inclusao:'C' },
+  "FELIPE RIGONI":       { saude:'C', educacao:'C', seguranca:'B', transporte:'C', economia:'C', ambiente:'B', inclusao:'B' },
 };
 
 function Disclaimer() {
@@ -223,7 +247,7 @@ export default function Match() {
         <p className="text-lg text-muted-foreground text-center -mt-2">Toque em cada candidato para ver as propostas por tema.</p>
 
         <div className="space-y-4">
-          {results.map((c) => (
+          {results.slice(0, 4).map((c) => (
             <CandidateProposalDetail key={c.id} candidate={c} answers={answers} />
           ))}
         </div>
