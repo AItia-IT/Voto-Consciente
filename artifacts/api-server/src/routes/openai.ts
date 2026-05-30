@@ -202,6 +202,31 @@ router.post("/conversations/:id/messages", async (req, res) => {
   }
 });
 
+// ── TTS helper ───────────────────────────────────────────────────────────────
+async function textToSpeechForSeniors(text: string): Promise<Buffer> {
+  const response = await openai.chat.completions.create({
+    model: "gpt-audio",
+    modalities: ["text", "audio"],
+    audio: { voice: "shimmer", format: "mp3" },
+    messages: [
+      {
+        role: "system",
+        content:
+          "Você é uma locutora brasileira calorosa, paciente e acolhedora, especializada em falar com idosos. " +
+          "Fale de forma muito lenta, pausada e clara, como se estivesse explicando algo com carinho a um familiar mais velho. " +
+          "Use um tom de voz suave, gentil e tranquilizador. Faça pausas naturais entre as frases. " +
+          "Nunca apresse a fala. Reproduza o texto exatamente como recebido, sem omitir nem acrescentar palavras.",
+      },
+      {
+        role: "user",
+        content: `Leia o seguinte texto em voz alta, de forma lenta e acolhedora:\n\n${text}`,
+      },
+    ],
+  });
+  const audioData = (response.choices[0]?.message as any)?.audio?.data ?? "";
+  return Buffer.from(audioData, "base64");
+}
+
 // ── TTS ──────────────────────────────────────────────────────────────────────
 router.post("/tts", async (req, res) => {
   try {
@@ -210,7 +235,7 @@ router.post("/tts", async (req, res) => {
       res.status(400).json({ error: "Campo 'text' obrigatório" });
       return;
     }
-    const audioBuffer = await textToSpeech(text.trim(), "nova", "mp3");
+    const audioBuffer = await textToSpeechForSeniors(text.trim());
     res.setHeader("Content-Type", "audio/mpeg");
     res.setHeader("Content-Length", audioBuffer.length);
     res.setHeader("Cache-Control", "no-cache");
