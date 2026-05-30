@@ -153,4 +153,27 @@ router.post("/conversations/:id/messages", async (req, res) => {
   }
 });
 
+router.post("/tts", async (req, res) => {
+  const { text } = req.body;
+  if (!text?.trim()) {
+    res.status(400).json({ error: "Texto obrigatório" });
+    return;
+  }
+  try {
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "nova",
+      input: text,
+      speed: 0.82,
+    });
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Length", buffer.length);
+    res.send(buffer);
+  } catch (err) {
+    req.log?.error({ err }, "Error generating TTS");
+    res.status(500).json({ error: "Erro ao gerar áudio" });
+  }
+});
+
 export default router;

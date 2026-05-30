@@ -1,31 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 
 export function useTTS() {
   const [speaking, setSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    const handleEnd = () => setSpeaking(false);
-    window.speechSynthesis.addEventListener('voiceschanged', () => {});
-    return () => {
-      window.speechSynthesis.cancel();
-    };
-  }, []);
-
-  const speak = (text: string) => {
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = 'pt-BR';
-    utt.rate = 0.85;
-    utt.pitch = 1;
-    utt.onend = () => setSpeaking(false);
-    utt.onerror = () => setSpeaking(false);
-    
+  const speak = async (text: string) => {
+    stop();
     setSpeaking(true);
-    window.speechSynthesis.speak(utt);
+    try {
+      const res = await fetch('/api/openai/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) throw new Error('TTS request failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        setSpeaking(false);
+        URL.revokeObjectURL(url);
+      };
+      audio.onerror = () => {
+        setSpeaking(false);
+        URL.revokeObjectURL(url);
+      };
+      await audio.play();
+    } catch {
+      setSpeaking(false);
+    }
   };
 
   const stop = () => {
-    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
     setSpeaking(false);
   };
 
