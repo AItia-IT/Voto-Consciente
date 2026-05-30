@@ -14,12 +14,7 @@ const QUIZ_ITEMS: QuizItem[] = [
   { id:3, text: '"Médico famoso descobriu chá que cura qualquer doença em 3 dias. Hospitais estão escondendo do povo!"', isFake: true, explanation: 'Fake! Curas milagrosas e conspirações médicas são sinais clássicos de desinformação. Consulte sempre um profissional de saúde.' },
   { id:4, text: '"O Bolsa Família é um programa federal de transferência de renda criado para apoiar famílias em situação de pobreza."', isFake: false, explanation: 'Verdade! O Bolsa Família existe desde 2003 e é comprovado por dados do governo federal.' },
   { id:5, text: '"Cientistas provaram que vacinas causam autismo — pesquisa foi censurada pela mídia!"', isFake: true, explanation: 'Fake! Esse estudo foi desmentido e o autor perdeu o registro médico por fraude. Vacinas são seguras e aprovadas por órgãos de saúde.' },
-  { id:6, text: '"O voto no Brasil é obrigatório para cidadãos entre 18 e 70 anos."', isFake: false, explanation: 'Verdade! Maiores de 70 anos e jovens de 16 a 17 anos podem votar, mas não são obrigados.' },
-  { id:7, text: '"WhatsApp vai começar a cobrar R$29,90 por mês a partir do próximo mês. Avise seus contatos!"', isFake: true, explanation: 'Fake! WhatsApp é gratuito. Mensagens como essa circulam há anos para assustar usuários.' },
-  { id:8, text: '"O presidente do Brasil é eleito pelo voto popular direto com segundo turno se nenhum candidato atingir 50% dos votos."', isFake: false, explanation: 'Verdade! Este é o sistema de votação previsto na Constituição Federal de 1988.' },
-  { id:9, text: '"Foto mostra candidato participando de ritual satânico — imagem vazada de reunião secreta!"', isFake: true, explanation: 'Fake! Fotos tiradas fora de contexto ou manipuladas são muito comuns na política. Sempre verifique a fonte original.' },
-  { id:10, text: '"O Senado Federal brasileiro é composto por 81 senadores, sendo 3 por estado e pelo Distrito Federal."', isFake: false, explanation: 'Verdade! São 3 senadores por cada um dos 26 estados mais o DF, totalizando 81 senadores.' }
-];
+  ];
 
 export default function Quiz() {
   const [started, setStarted] = useState(false);

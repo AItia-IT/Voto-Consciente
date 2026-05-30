@@ -172,9 +172,6 @@ export default function Home() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-bold text-lg leading-tight" style={{ color: "#1a2744" }}>{card.title}</h3>
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: "#FEF3C7", color: "#92400E" }}>
-                          {card.badge}
-                        </span>
                       </div>
                       <p className="text-sm leading-snug" style={{ color: "#6B7280" }}>{card.description}</p>
                     </div>
